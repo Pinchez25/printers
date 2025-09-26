@@ -1,0 +1,760 @@
+{% extends 'base.html' %} {% load static %} {% block title %} Gallery -
+PrintCraft Pro {% endblock %} {% block styles %}
+<link rel="stylesheet" href="{% static 'css/gallery.css' %}" />
+{% endblock %} {% block content %}
+<!-- Gallery Hero -->
+<section class="hero is-medium">
+  <div class="hero-body">
+    <div class="container has-text-centered">
+      <h1 class="hero-title">Transform Your Ideas Into Print</h1>
+      <p class="hero-subtitle">
+        From stunning business cards to eye-catching apparel, we bring your
+        vision to life with professional printing excellence
+      </p>
+
+      <!-- Search and Filter Controls in Hero -->
+      <div class="hero-search-section">
+        <div class="search-wrapper">
+          <div class="control has-icons-left">
+            <input
+              class="input search-input"
+              type="text"
+              placeholder="Search by title, description, or tags..."
+              id="searchInput"
+            />
+            <span class="icon is-left search-icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </div>
+        </div>
+
+        <div class="filter-tags" id="filterTags">
+          <span class="filter-tag active" data-tag="all">All</span>
+          <!-- Dynamic tags will be loaded here -->
+          <span
+            class="filter-tag loading"
+            id="tagsLoading"
+            style="display: none"
+          >
+            <i class="fas fa-spinner fa-spin"></i> Loading...
+          </span>
+          <span
+            class="filter-tag no-tags"
+            id="noTags"
+            style="display: none; color: #888; font-style: italic"
+          >
+            No tags available
+          </span>
+        </div>
+
+        <button class="button clear-filters-btn" id="clearFilters">
+          <i class="fas fa-times mr-1"></i> Clear Filters
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Gallery Grid -->
+<section class="section">
+  <div class="container">
+    <div class="gallery-grid" id="galleryGrid">
+      <!-- Gallery items will be populated here -->
+    </div>
+
+    <!-- No results message -->
+    <div class="no-results-message" id="noResultsMessage" style="display: none">
+      <div class="has-text-centered" style="padding: 3rem">
+        <i
+          class="fas fa-search"
+          style="font-size: 3rem; color: #ccc; margin-bottom: 1rem"
+        ></i>
+        <h3 class="title is-4 has-text-grey">No items found</h3>
+        <p class="has-text-grey" style="margin-bottom: 1.5rem">
+          <span id="noResultsText"
+            >No portfolio items available at the moment.</span
+          >
+        </p>
+        <button class="button is-primary" id="clearAllFiltersBtn">
+          <i class="fas fa-times mr-1"></i> Clear All Filters
+        </button>
+      </div>
+    </div>
+
+    <div class="load-more-container">
+      <button class="button load-more-btn" id="loadMoreBtn">
+        <i class="fas fa-plus mr-2"></i> Load More
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+{% include "components/testimonials.html" %}
+
+{% endblock %} {% block scripts %}
+<script>
+  // Global variables
+  let currentImages = [];
+  let selectedTags = ["all"];
+  const itemsPerPage = 6;
+  let searchTimeout;
+  let isLoading = false;
+  let currentPage = 1;
+  let hasNextPage = true;
+  let searchDebounceTimer;
+
+  // Testimonial carousel variables
+  let testimonialInterval;
+  let currentTestimonial = 0;
+
+  // API endpoints
+  const API_ENDPOINT = '{% url "gallery:gallery_api" %}';
+  const TAGS_API_ENDPOINT = '{% url "gallery:gallery_tags_api" %}';
+
+  // Initialize gallery
+  document.addEventListener("DOMContentLoaded", function () {
+    console.log("DOM Content Loaded - Initializing gallery...");
+    console.log("Initial selectedTags:", selectedTags);
+
+    loadFilterTags();
+    loadGalleryItems();
+    setupEventListeners();
+    startTestimonialCarousel();
+    setupInfiniteScroll();
+    setupScrollEffects();
+
+    // Initialize lightbox after gallery items are created
+    setTimeout(() => {
+      if (window.lightbox) {
+        window.lightbox.refresh();
+      }
+    }, 100);
+  });
+
+  // Load filter tags dynamically
+  async function loadFilterTags() {
+    const tagsLoading = document.getElementById("tagsLoading");
+    if (tagsLoading) {
+      tagsLoading.style.display = "inline-block";
+    }
+
+    try {
+      const response = await fetch(TAGS_API_ENDPOINT);
+      const data = await response.json();
+
+      if (data.success && data.tags && data.tags.length > 0) {
+        const filterTagsContainer = document.getElementById("filterTags");
+        if (filterTagsContainer) {
+          // Add dynamic tags after the "All" tag
+          const allTag = filterTagsContainer.querySelector(
+            '.filter-tag[data-tag="all"]'
+          );
+
+          data.tags.forEach((tag) => {
+            const tagElement = document.createElement("span");
+            tagElement.className = "filter-tag";
+            tagElement.setAttribute(
+              "data-tag",
+              tag.slug || tag.name.toLowerCase().replace(/\s+/g, "-")
+            );
+            tagElement.textContent = tag.name;
+            tagElement.title = `${tag.name} (${tag.count || 0} items)`;
+
+            // Insert after "All" tag
+            if (allTag && allTag.parentNode) {
+              allTag.parentNode.insertBefore(tagElement, allTag.nextSibling);
+            } else {
+              filterTagsContainer.appendChild(tagElement);
+            }
+          });
+
+          console.log("Tags loaded successfully:", data.tags.length, "tags");
+          console.log("Current selectedTags:", selectedTags);
+
+          // Re-setup event listeners for the new tags
+          setupEventListeners();
+        }
+      } else {
+        // Show "no tags" message
+        const noTagsElement = document.getElementById("noTags");
+        if (noTagsElement) {
+          noTagsElement.style.display = "inline-block";
+        }
+        console.warn(
+          "No tags available or failed to load tags:",
+          data.message || "No tags found"
+        );
+      }
+    } catch (error) {
+      console.error("Error loading filter tags:", error);
+    } finally {
+      // Hide loading indicator
+      if (tagsLoading) {
+        tagsLoading.style.display = "none";
+      }
+    }
+  }
+
+  // Setup infinite scroll
+  function setupInfiniteScroll() {
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
+
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener("click", () => {
+        if (!isLoading && hasNextPage) {
+          currentPage++;
+          loadGalleryItems(true, false);
+        }
+      });
+    }
+  }
+
+  // Load gallery items from API
+  async function loadGalleryItems(append = false, resetPagination = true) {
+    if (isLoading) return;
+    isLoading = true;
+
+    if (resetPagination) {
+      currentPage = 1;
+    }
+
+    const searchInput = document.getElementById("searchInput");
+    const searchTerm = searchInput ? searchInput.value.trim() : "";
+
+    // Build query parameters
+    const params = new URLSearchParams({
+      page: currentPage,
+      per_page: itemsPerPage,
+      search: searchTerm,
+    });
+
+    // Add selected tags (exclude 'all' from the API call)
+    if (selectedTags.length > 0) {
+      selectedTags.forEach((tag) => {
+        if (tag !== "all") {
+          // Don't send 'all' to API
+          // Convert display tag to API tag format
+          const apiTag = tag.replace(/-/g, " "); // Convert back from slug format
+          params.append("tags[]", apiTag);
+          console.log("Adding tag filter:", tag, "->", apiTag); // Debug logging
+        }
+      });
+    }
+
+    const apiUrl = `${API_ENDPOINT}?${params.toString()}`;
+    console.log("API URL:", apiUrl); // Debug logging
+    console.log("selectedTags:", selectedTags);
+    console.log("params object:", Object.fromEntries(params.entries()));
+
+    // Count actual tag parameters (excluding 'all')
+    const tagParams = Array.from(params.entries()).filter(
+      ([key, value]) => key === "tags[]"
+    );
+    console.log("Tag parameters being sent:", tagParams.length, tagParams);
+
+    try {
+      const response = await fetch(`${API_ENDPOINT}?${params.toString()}`);
+      const data = await response.json();
+
+      if (data.success) {
+        if (!append) {
+          const galleryGrid = document.getElementById("galleryGrid");
+          const noResultsMessage = document.getElementById("noResultsMessage");
+          if (galleryGrid) galleryGrid.innerHTML = "";
+          if (noResultsMessage) noResultsMessage.style.display = "none";
+          currentImages = [];
+        }
+
+        // Handle no results
+        if (data.items.length === 0) {
+          showNoResultsMessage();
+          isLoading = false;
+          return;
+        }
+
+        // Add to current images array
+        currentImages.push(...data.items);
+
+        // Create and append new gallery items
+        const galleryGrid = document.getElementById("galleryGrid");
+        if (galleryGrid && data.items.length > 0) {
+          const fragment = document.createDocumentFragment();
+          data.items.forEach((item, index) => {
+            const galleryItem = createGalleryItem(
+              item,
+              currentImages.length - data.items.length + index
+            );
+            fragment.appendChild(galleryItem);
+          });
+
+          galleryGrid.appendChild(fragment);
+        }
+
+        // Update pagination state
+        currentPage = data.pagination.current_page;
+        hasNextPage = data.pagination.has_next;
+
+        // Update load more button
+        updateLoadMoreButton(data.pagination);
+
+        // Setup lazy loading for new images
+        setTimeout(() => {
+          setupLazyLoading();
+          isLoading = false;
+
+          // Refresh lightbox to bind to new gallery items
+          if (window.lightbox) {
+            window.lightbox.refresh();
+          }
+        }, 100);
+      } else {
+        console.error("Failed to load gallery items:", data.message);
+        showNoResultsMessage("Failed to load gallery items. Please try again.");
+        isLoading = false;
+      }
+    } catch (error) {
+      console.error("Error loading gallery items:", error);
+      isLoading = false;
+    }
+  }
+
+  // Show no results message
+  function showNoResultsMessage(customMessage = null) {
+    const galleryGrid = document.getElementById("galleryGrid");
+    const noResultsMessage = document.getElementById("noResultsMessage");
+    const noResultsText = document.getElementById("noResultsText");
+
+    if (galleryGrid) galleryGrid.innerHTML = "";
+    if (noResultsMessage) noResultsMessage.style.display = "block";
+    if (noResultsText && customMessage) {
+      noResultsText.textContent = customMessage;
+    }
+
+    // Hide load more button
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
+    if (loadMoreBtn) loadMoreBtn.style.display = "none";
+  }
+
+  // Update load more button
+  function updateLoadMoreButton(pagination = null) {
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
+    if (!loadMoreBtn) return;
+
+    if (pagination) {
+      if (pagination.has_next) {
+        loadMoreBtn.style.display = "block";
+        loadMoreBtn.innerHTML = `<i class="fas fa-plus mr-2"></i> Load More (${pagination.current_page}/${pagination.total_pages})`;
+      } else {
+        loadMoreBtn.style.display = "none";
+      }
+    } else {
+      // Fallback for when no pagination data is available
+      loadMoreBtn.style.display = hasNextPage ? "block" : "none";
+      loadMoreBtn.innerHTML = `<i class="fas fa-plus mr-2"></i> Load More`;
+    }
+  }
+
+  // Create gallery item
+  function createGalleryItem(item, index) {
+    const div = document.createElement("div");
+    div.className = "gallery-card animate-on-scroll";
+
+    // Create the gallery item inside the card
+    const galleryItem = document.createElement("div");
+    galleryItem.className = "gallery-item";
+    galleryItem.setAttribute("data-src", item.fullImage);
+    galleryItem.innerHTML = `
+            <div class="gallery-card-image">
+                <img class="lazy-image image-skeleton" data-src="${
+                  item.thumbnail
+                }" alt="${item.title}">
+                <!-- Preview indicator - always visible -->
+                <div class="gallery-preview-indicator">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <!-- Overlay with search icon - shows on hover -->
+                <div class="gallery-card-overlay">
+                    <i class="fas fa-search-plus has-text-white is-size-2"></i>
+                </div>
+            </div>
+            <div class="gallery-card-content">
+                <h3 class="title is-5 has-text-light">${item.title}</h3>
+                <p class="has-text-grey-light">${item.description}</p>
+                <div class="gallery-card-tags">
+                    ${item.tags
+                      .map((tag) => `<span class="gallery-tag">${tag}</span>`)
+                      .join("")}
+                </div>
+            </div>
+        `;
+
+    div.appendChild(galleryItem);
+    return div;
+  }
+
+  // Setup lazy loading with error handling
+  function setupLazyLoading() {
+    const lazyImages = document.querySelectorAll(".lazy-image:not(.loaded)");
+
+    if ("IntersectionObserver" in window) {
+      const imageObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const img = entry.target;
+              img.src = img.dataset.src;
+              img.classList.remove("image-skeleton");
+              img.classList.add("loaded");
+              imageObserver.unobserve(img);
+
+              img.onload = () => {
+                img.style.opacity = "1";
+              };
+
+              // Add error handling for failed image loads
+              img.onerror = () => {
+                img.src = "{% static 'default.png' %}";
+                img.style.opacity = "1";
+                img.classList.add("error-fallback");
+                console.log("Image failed to load, using default placeholder");
+              };
+            }
+          });
+        },
+        { threshold: 0.1, rootMargin: "50px" }
+      );
+
+      lazyImages.forEach((img) => {
+        img.style.opacity = "0";
+        img.style.transition = "opacity 0.3s ease";
+        imageObserver.observe(img);
+      });
+    } else {
+      // Fallback for browsers without IntersectionObserver
+      lazyImages.forEach((img) => {
+        img.src = img.dataset.src;
+        img.classList.remove("image-skeleton");
+        img.classList.add("loaded");
+
+        // Add error handling for failed image loads
+        img.onerror = () => {
+          img.src = "{% static 'default.png' %}";
+          img.classList.add("error-fallback");
+          console.log("Image failed to load, using default placeholder");
+        };
+      });
+    }
+  }
+
+  // Setup event listeners
+  function setupEventListeners() {
+    console.log("Setting up event listeners...");
+
+    // Search input with debouncing
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput) {
+      searchInput.addEventListener("input", function () {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => {
+          console.log("Search triggered, reloading items...");
+          loadGalleryItems(false, true);
+        }, 300);
+      });
+    }
+
+    // Filter tags - Multi-select functionality
+    // Remove existing listeners first to avoid duplicates
+    document.querySelectorAll(".filter-tag").forEach((tag) => {
+      // Remove existing click listener if it exists
+      tag.removeEventListener("click", handleTagClick);
+      // Add new click listener
+      tag.addEventListener("click", handleTagClick);
+    });
+
+    // Clear filters button
+    const clearFiltersBtn = document.getElementById("clearFilters");
+    if (clearFiltersBtn) {
+      clearFiltersBtn.removeEventListener("click", clearAllFilters);
+      clearFiltersBtn.addEventListener("click", clearAllFilters);
+    }
+
+    // Clear all filters button (in no results message)
+    const clearAllFiltersBtn = document.getElementById("clearAllFiltersBtn");
+    if (clearAllFiltersBtn) {
+      clearAllFiltersBtn.removeEventListener("click", clearAllFilters);
+      clearAllFiltersBtn.addEventListener("click", clearAllFilters);
+    }
+
+    console.log("Event listeners setup complete");
+  }
+
+  // Handle tag click events
+  function handleTagClick(event) {
+    const tagValue = this.dataset.tag;
+    console.log("Tag clicked:", tagValue);
+    console.log("Current selectedTags before click:", selectedTags);
+
+    if (tagValue === "all") {
+      // Clear all selections and select "All"
+      document.querySelectorAll(".filter-tag").forEach((t) => {
+        t.classList.remove("active", "selected");
+      });
+      this.classList.add("active");
+      selectedTags = ["all"];
+      console.log('Selected "All", selectedTags:', selectedTags);
+    } else {
+      // Remove "All" selection if selecting specific tags
+      const allTag = document.querySelector('.filter-tag[data-tag="all"]');
+      if (allTag) allTag.classList.remove("active");
+
+      // Toggle this tag
+      if (selectedTags.includes(tagValue)) {
+        selectedTags = selectedTags.filter((tag) => tag !== tagValue);
+        this.classList.remove("selected");
+        console.log("Removed tag:", tagValue, "selectedTags:", selectedTags);
+      } else {
+        selectedTags.push(tagValue);
+        this.classList.add("selected");
+        console.log("Added tag:", tagValue, "selectedTags:", selectedTags);
+      }
+
+      // If no specific tags selected, activate "All"
+      if (
+        selectedTags.length === 0 ||
+        (selectedTags.length === 1 && selectedTags[0] === "all")
+      ) {
+        if (allTag) allTag.classList.add("active");
+        selectedTags = ["all"];
+        document
+          .querySelectorAll(".filter-tag")
+          .forEach((t) => t.classList.remove("selected"));
+        console.log(
+          'No tags selected, defaulting to "All", selectedTags:',
+          selectedTags
+        );
+      }
+    }
+
+    console.log("Final selectedTags:", selectedTags);
+    console.log("Triggering gallery reload...");
+    loadGalleryItems(false, true);
+  }
+
+  // Clear all filters
+  function clearAllFilters() {
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput) searchInput.value = "";
+
+    // Reset all tag selections
+    document.querySelectorAll(".filter-tag").forEach((t) => {
+      t.classList.remove("active", "selected");
+    });
+
+    // Activate "All" tag
+    const allTag = document.querySelector('.filter-tag[data-tag="all"]');
+    if (allTag) allTag.classList.add("active");
+
+    // Reset selected tags
+    selectedTags = ["all"];
+
+    // Reload gallery items
+    loadGalleryItems(false, true);
+  }
+
+  // Testimonial carousel - Fixed to prevent multiple intervals
+  function startTestimonialCarousel() {
+    const testimonials = document.querySelectorAll(".testimonial-item");
+    const dots = document.querySelectorAll(".testimonial-dot");
+    const totalTestimonials = testimonials.length;
+
+    if (totalTestimonials === 0) return;
+
+    function showTestimonial(index) {
+      testimonials.forEach((item) => item.classList.remove("active"));
+      dots.forEach((dot) => dot.classList.remove("active"));
+
+      if (testimonials[index]) testimonials[index].classList.add("active");
+      if (dots[index]) dots[index].classList.add("active");
+    }
+
+    function nextTestimonial() {
+      currentTestimonial = (currentTestimonial + 1) % totalTestimonials;
+      showTestimonial(currentTestimonial);
+    }
+
+    function startInterval() {
+      // Clear any existing interval
+      if (testimonialInterval) {
+        clearInterval(testimonialInterval);
+      }
+      testimonialInterval = setInterval(nextTestimonial, 5000);
+    }
+
+    function stopInterval() {
+      if (testimonialInterval) {
+        clearInterval(testimonialInterval);
+        testimonialInterval = null;
+      }
+    }
+
+    // Start auto-advance
+    startInterval();
+
+    // Manual navigation
+    dots.forEach((dot, index) => {
+      dot.addEventListener("click", () => {
+        stopInterval();
+        currentTestimonial = index;
+        showTestimonial(currentTestimonial);
+
+        // Restart auto-advance after manual interaction
+        setTimeout(startInterval, 10000);
+      });
+    });
+
+    // Pause on hover
+    const carousel = document.querySelector(".testimonial-carousel");
+    if (carousel) {
+      carousel.addEventListener("mouseenter", stopInterval);
+      carousel.addEventListener("mouseleave", startInterval);
+    }
+  }
+
+  // Animation observer
+  function setupAnimationObserver() {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("animated");
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+    );
+
+    // Observe existing elements
+    document.querySelectorAll(".animate-on-scroll").forEach((element) => {
+      observer.observe(element);
+    });
+
+    // Create a mutation observer for dynamically added elements
+    const galleryGrid = document.getElementById("galleryGrid");
+    if (galleryGrid) {
+      const mutationObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              if (
+                node.classList &&
+                node.classList.contains("animate-on-scroll")
+              ) {
+                observer.observe(node);
+              }
+              // Also check child elements
+              const animatedChildren =
+                node.querySelectorAll &&
+                node.querySelectorAll(".animate-on-scroll");
+              if (animatedChildren) {
+                animatedChildren.forEach((child) => observer.observe(child));
+              }
+            }
+          });
+        });
+      });
+
+      mutationObserver.observe(galleryGrid, {
+        childList: true,
+        subtree: true,
+      });
+    }
+  }
+
+  // Setup scroll effects
+  function setupScrollEffects() {
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+      anchor.addEventListener("click", function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute("href"));
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    });
+
+    // Navbar scroll effect and progress bar
+    window.addEventListener("scroll", () => {
+      const navbar = document.querySelector(".navbar");
+      if (navbar) {
+        navbar.classList.toggle("scrolled", window.scrollY > 100);
+      }
+
+      // Progress bar
+      const scrollPercent =
+        (window.scrollY /
+          (document.documentElement.scrollHeight - window.innerHeight)) *
+        100;
+      const progressBar = document.querySelector(".progress-bar");
+      if (progressBar) {
+        progressBar.style.width = `${Math.max(
+          0,
+          Math.min(100, scrollPercent)
+        )}%`;
+      }
+    });
+
+    // Mobile menu toggle
+    const navbarBurger = document.querySelector(".navbar-burger");
+    const navbarMenu = document.querySelector(".navbar-menu");
+
+    if (navbarBurger && navbarMenu) {
+      navbarBurger.addEventListener("click", () => {
+        navbarBurger.classList.toggle("is-active");
+        navbarMenu.classList.toggle("is-active");
+      });
+
+      // Close mobile menu when clicking on links
+      document.querySelectorAll(".navbar-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          navbarBurger.classList.remove("is-active");
+          navbarMenu.classList.remove("is-active");
+        });
+      });
+    }
+
+    // Setup animation observer
+    setupAnimationObserver();
+  }
+
+  // Cleanup on page unload
+  window.addEventListener("beforeunload", () => {
+    if (testimonialInterval) {
+      clearInterval(testimonialInterval);
+    }
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer);
+    }
+  });
+
+  console.log("🎨 PrintCraft Pro Gallery - Loaded Successfully!");
+
+  // Debug helper function (can be called from browser console)
+  window.debugGallery = function () {
+    console.log("=== GALLERY DEBUG INFO ===");
+    console.log("selectedTags:", selectedTags);
+    console.log(
+      "Available tags:",
+      document.querySelectorAll(".filter-tag").length
+    );
+    console.log("API Endpoint:", API_ENDPOINT);
+    console.log("Tags API Endpoint:", TAGS_API_ENDPOINT);
+    console.log("Current page:", currentPage);
+    console.log("Has next page:", hasNextPage);
+    console.log("Items per page:", itemsPerPage);
+    console.log("========================");
+  };
+</script>
+
+{% endblock %}
