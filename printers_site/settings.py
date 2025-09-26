@@ -1,6 +1,8 @@
 import os
+import sys
 from pathlib import Path
 
+from django.templatetags.static import static
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,6 +15,12 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
+# Use SQLite for tests
+if 'test' in sys.argv:
+    SECRET_KEY = 'test-secret-key'
+    DEBUG = True
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -23,9 +31,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'django_filters',
     'accounts.apps.AccountsConfig',
     'gallery.apps.GalleryConfig',
     "taggit",
+    "imagekit",
+    "django_backblaze_b2",
     'django_cleanup.apps.CleanupConfig',
 ]
 
@@ -49,7 +61,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR/'templates',
+            BASE_DIR / 'templates',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -57,6 +69,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'gallery.context_processors.company_config',
             ],
         },
     },
@@ -78,11 +91,20 @@ DATABASES = {
     }
 }
 
+# Override database for tests
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    }
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASS")
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
@@ -118,9 +140,81 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 UNFOLD = {
-    "SITE_TITLE": "Nairobi Printers",
-    "SITE_HEADER": "Printer Site",
-    "SITE_SUBHEADER": "Your partner in printing",
+    "SITE_TITLE": "PeaShan Enterprises",
+    "SITE_HEADER": "PeaShan Enterprises",
+    "SITE_SUBHEADER": "Your go to partner for all your printing needs.",
+    "SITE_ICON": {
+        "light": lambda request: static("icon.ico"),
+        "dark": lambda request: static("icon.ico"),
+    },
+    "SITE_LOGO": {
+        "light": lambda request: static("icon.ico"),
+        "dark": lambda request: static("icon.ico"),
+    },
+
 }
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    },
+    "django-backblaze-b2": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "django_backblaze_b2_cache_table",
+    },
+}
+
+
+BACKBLAZE_CONFIG = {
+    "application_key_id": os.getenv("BACKBLAZE_KEY_ID"),
+    "application_key": os.getenv("BACKBLAZE_KEY"),
+    "bucket": os.getenv("BACKBLAZE_BUCKET"),
+    "authorize_on_init": False,
+    "validate_on_init": False,
+    "account_info": {"type": "memory"},
+}
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
