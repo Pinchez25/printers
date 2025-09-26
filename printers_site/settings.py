@@ -43,6 +43,9 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = "accounts.CustomUser"
 
+# Message storage configuration
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
