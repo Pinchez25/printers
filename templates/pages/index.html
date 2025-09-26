@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <section class="hero is-medium" id="home">
+        <div class="hero-body">
+            <div class="container has-text-centered">
+                <h1 class="hero-title">PeaShan Enterprises</h1>
+                <p class="hero-subtitle mb-5">
+                    Professional printing services for all your business needs.<br>
+                    From business cards to large format posters, we bring your vision to life.
+                </p>
+                <button class="button cta-button is-large">
+                    <i class="fas fa-rocket mr-2"></i> Get Started
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="section" id="services">
+        <div class="container">
+            <div class="has-text-centered animate-on-scroll mb-6">
+                <h2 class="title is-2 has-text-light">Our Services</h2>
+                <p class="subtitle has-text-grey-light">Professional printing solutions tailored to your needs</p>
+                <p class="has-text-grey-light mt-3" style="font-style: italic;">
+                    <i class="fas fa-plus-circle mr-2"></i>
+                    And so much more! From custom packaging to specialised materials, we handle projects of any scale
+                    and complexity.
+                </p>
+            </div>
+            <div class="columns is-multiline">
+                <div class="column is-4 animate-on-scroll">
+                    <div class="card has-text-centered floating">
+                        <div class="card-content">
+                            <i class="service-icon fas fa-id-card"></i>
+                            <h3 class="title is-4 has-text-light">Business Cards</h3>
+                            <p>Premium quality business cards with various finishes and materials to make lasting
+                                impressions.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-4 animate-on-scroll">
+                    <div class="card has-text-centered floating" style="animation-delay: 0.5s;">
+                        <div class="card-content">
+                            <i class="service-icon fas fa-tshirt"></i>
+                            <h3 class="title is-4 has-text-light">Apparel Printing</h3>
+                            <p>Custom t-shirt printing, embroidery, and promotional apparel for events and
+                                businesses.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-4 animate-on-scroll">
+                    <div class="card has-text-centered floating" style="animation-delay: 1s;">
+                        <div class="card-content">
+                            <i class="service-icon fas fa-image"></i>
+                            <h3 class="title is-4 has-text-light">Posters & Banners</h3>
+                            <p>Large format printing for advertising, events, and promotional materials in various
+                                sizes.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-4 animate-on-scroll">
+                    <div class="card has-text-centered pulse">
+                        <div class="card-content">
+                            <i class="service-icon fas fa-award"></i>
+                            <h3 class="title is-4 has-text-light">Logo Design</h3>
+                            <p>Professional logo design and branding services to establish your unique corporate
+                                identity.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-4 animate-on-scroll">
+                    <div class="card has-text-centered pulse" style="animation-delay: 0.3s;">
+                        <div class="card-content">
+                            <i class="service-icon fas fa-book"></i>
+                            <h3 class="title is-4 has-text-light">Brochures & Flyers</h3>
+                            <p>Marketing materials that effectively communicate your message with professional design
+                                and
+                                printing.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-4 animate-on-scroll">
+                    <div class="card has-text-centered pulse" style="animation-delay: 0.6s;">
+                        <div class="card-content">
+                            <i class="service-icon fas fa-gift"></i>
+                            <h3 class="title is-4 has-text-light">Custom Products</h3>
+                            <p>Personalised mugs, keychains, stickers, and promotional items for any occasion or
+                                business
+                                need.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="section">
+        <div class="container">
+            <div class="columns has-text-centered">
+                <div class="column animate-on-scroll">
+                    <p class="stats-counter" data-target="{{ config.happy_customers|default:5000 }}">0</p>
+                    <p class="has-text-grey-light">Happy Customers</p>
+                </div>
+                <div class="column animate-on-scroll">
+                    <p class="stats-counter" data-target="{{ config.projects_completed|default:15000 }}">0</p>
+                    <p class="has-text-grey-light">Projects Completed</p>
+                </div>
+                <div class="column animate-on-scroll">
+                    <p class="stats-counter" data-target="{{ config.years_experience|default:8 }}">0</p>
+                    <p class="has-text-grey-light">Years Experience</p>
+                </div>
+                <div class="column animate-on-scroll">
+                    <p class="stats-counter" data-target="{{ config.support_hours|default:24 }}">0</p>
+                    <p class="has-text-grey-light">Hour Support</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Partners Section -->
+    <section class="section py-5">
+        <div class="container">
+            <div class="has-text-centered mb-5">
+                <h2 class="title is-3 has-text-light">Our Partners</h2>
+                <p class="subtitle has-text-grey-light">Collaborating with industry leaders to deliver exceptional printing solutions</p>
+            </div>
+        </div>
+        <div class="partners-carousel">
+            <div class="partners-track">
+                <!-- First set of partners -->
+                {% for i in "12345678"|make_list %}
+                    <div class="partner-item">
+                        <img src="{% static 'partners/'|add:i|add:'.png' %}" alt="Partner {{ i }}"
+                             onerror="this.onerror=null; this.src='{% static 'default.png' %}'; this.classList.add('error-fallback'); console.log('Partner image {{ i }} failed to load, using default placeholder');">
+                    </div>
+                {% endfor %}
+                <!-- Duplicate set for infinite scroll -->
+                {% for i in "12345678"|make_list %}
+                    <div class="partner-item">
+                        <img src="{% static 'partners/'|add:i|add:'.png' %}" alt="Partner {{ i }}"
+                             onerror="this.onerror=null; this.src='{% static 'default.png' %}'; this.classList.add('error-fallback'); console.log('Partner image {{ i }} failed to load, using default placeholder');">
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="section" id="gallery">
+        <div class="container">
+            <div class="has-text-centered animate-on-scroll mb-6">
+                <h2 class="title is-2 has-text-light">Our Work Gallery</h2>
+                <p class="subtitle has-text-grey-light">Showcase of our finest printing projects</p>
+            </div>
+            <div class="gallery-grid" id="lightgallery">
+                {% for item in latest_portfolio_items %}
+                <div class="gallery-card animate-on-scroll">
+                    <div class="gallery-item" data-src="{% if item.image %}{{ item.image.url }}{% else %}{% static 'default.png' %}{% endif %}">
+                        <div class="gallery-card-image">
+                            <img src="{% if item.image %}{{ item.image.url }}{% else %}{% static 'default.png' %}{% endif %}" alt="{{ item.title }}" loading="lazy" onerror="this.onerror=null; this.src='{% static 'default.png' %}'; this.classList.add('error-fallback'); console.log('Image failed to load, using default placeholder');">
+                            <!-- Preview indicator - always visible -->
+                            <div class="gallery-preview-indicator">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <!-- Overlay with search icon - shows on hover -->
+                            <div class="gallery-card-overlay">
+                                <i class="fas fa-search-plus has-text-white is-size-2"></i>
+                            </div>
+                        </div>
+                        <div class="gallery-card-content">
+                            <h3 class="title is-5 has-text-light">{{ item.title }}</h3>
+                            <p class="has-text-grey-light">{{ item.description|truncatechars:60 }}</p>
+                            {% if item.tags.all %}
+                            <div class="gallery-card-tags">
+                                {% for tag in item.tags.all|slice:":3" %}
+                                <span class="gallery-tag">{{ tag.name }}</span>
+                                {% endfor %}
+                                {% if item.tags.all|length > 3 %}
+                                <span class="gallery-tag">+{{ item.tags.all|length|add:"-3" }} more</span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <!-- Fallback content when no portfolio items exist -->
+                <div class="column is-12">
+                    <div class="has-text-centered" style="padding: 3rem;">
+                        <i class="fas fa-images" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+                        <h3 class="title is-4 has-text-grey">Portfolio Coming Soon</h3>
+                        <p class="has-text-grey">We're working on showcasing our latest projects. Check back soon!</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="has-text-centered mt-6">
+                <a href="{% url 'gallery:gallery' %}" class="button is-large is-outlined"
+                   style="color: var(--secondary); border-color: var(--secondary);">
+                    <i class="fas fa-eye mr-2"></i> See More Work
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Parallax Section -->
+    <div class="parallax-container">
+        <div class="parallax-bg" style="background-image: url('{% static 'Peashan.png' %}');"
+             onerror="this.style.backgroundImage='url({% static 'default.png' %})'; console.log('Parallax background failed to load, using default placeholder');"></div>
+        <div class="parallax-overlay"></div>
+        <div class="hero is-medium">
+            <div class="hero-body">
+                <div class="container has-text-centered">
+                    <h2 class="title is-2 has-text-light">Quality You Can Trust</h2>
+                    <p class="subtitle has-text-light">Professional printing services with guaranteed satisfaction</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include "components/about.html" %}
+
+    <!-- Contact Section -->
+    <section class="section" id="contact">
+        <div class="container">
+            <div class="has-text-centered animate-on-scroll mb-6">
+                <h2 class="title is-2 has-text-light">Get In Touch</h2>
+                <p class="subtitle has-text-grey-light">Ready to start your printing project? Contact us today!</p>
+            </div>
+            <div class="columns">
+                <div class="column is-8 is-offset-2">
+                    <div class="contact-form animate-on-scroll">
+                        <form id="contactForm" method="post">
+                            {% csrf_token %}
+
+                            <!-- Name -->
+                            <div class="field">
+                                <label class="label has-text-light" for="full_name">Name</label>
+                                <div class="control">
+                                    <input
+                                            id="full_name"
+                                            class="input"
+                                            type="text"
+                                            placeholder="Your full name"
+                                            name="name"
+                                            required
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="field">
+                                <label class="label has-text-light" for="email">Email
+                                    <span class="has-text-grey">(optional)</span>
+                                </label>
+                                <div class="control">
+                                    <input
+                                            id="email"
+                                            class="input"
+                                            type="email"
+                                            placeholder="your.email@example.com"
+                                            name="email"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Service -->
+                            <div class="field">
+                                <label class="label has-text-light" for="service">Service Required</label>
+                                <div class="control">
+                                    <div class="select is-fullwidth">
+                                        <select id="service" name="service" required>
+                                            {% if config.services_offered %}
+                                                {% for service in config.services_offered %}
+                                                    <option>{{ service }}</option>
+                                                {% endfor %}
+                                            {% else %}
+                                                <option>Business Cards</option>
+                                                <option>Apparel Printing</option>
+                                                <option>Posters & Banners</option>
+                                                <option>Logo Design</option>
+                                                <option>Brochures & Flyers</option>
+                                                <option>Custom Products</option>
+                                                <option>Other</option>
+                                            {% endif %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Message -->
+                            <div class="field">
+                                <label class="label has-text-light" for="message">Message</label>
+                                <div class="control">
+            <textarea
+                    id="message"
+                    class="textarea"
+                    placeholder="Tell us about your project requirements..."
+                    name="message"
+                    required
+            ></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Submit -->
+                            <div class="field">
+                                <div class="control">
+                                    <button class="button cta-button is-fullwidth" type="submit">
+                                        <i class="fas fa-paper-plane mr-2"></i> Send Message
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container" style="display: none;">
+        <div class="notification-content">
+            <i class="fas fa-check-circle notification-icon"></i>
+            <span class="notification-message"></span>
+            <button class="notification-close" onclick="closeNotification()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+{% endblock %}
+
