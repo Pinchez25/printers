@@ -1,0 +1,31 @@
+NEW CONTACT FORM INQUIRY - {{ service }}
+
+A potential customer has submitted an inquiry through your website contact form.
+
+CONTACT INFORMATION:
+===================
+Name: {{ name }}
+
+{% if email %}Email: {{ email }}{% else %}Email: Not provided{% endif %}
+
+Service Required: {{ service }}
+
+MESSAGE:
+========
+{{ message }}
+
+{% if config %}
+COMPANY INFORMATION:
+===================
+{% if config.address %}{{ config.address }}
+
+{% endif %}{% if config.email %}Email: {{ config.email }}{% endif %}
+
+{% if config.contact_number %}Phone: {{ config.contact_number }}{% endif %}
+{% endif %}
+
+This inquiry was received on {% now "F j, Y \a\t g:i A" %}.
+
+---
+PeaShan Enterprises - Professional Printing Services
+This email was sent from your website contact form.
