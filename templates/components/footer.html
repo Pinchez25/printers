@@ -1,0 +1,82 @@
+<footer class="footer">
+    <div class="container">
+        <div class="columns">
+            <div class="column is-4">
+                <h4 class="title is-4 has-text-light">PeaShan Enterprises</h4>
+                <p class="has-text-grey-light">
+                    Professional printing services for all your business needs. Quality,
+                    reliability, and customer satisfaction guaranteed.
+                </p>
+            </div>
+            <div class="column is-4">
+                <h4 class="title is-5 has-text-light">Quick Links</h4>
+                <ul>
+                    <li><a href="#home" class="has-text-grey-light">Home</a></li>
+                    <li><a href="#services" class="has-text-grey-light">Services</a></li>
+                    <li><a href="#gallery" class="has-text-grey-light">Gallery</a></li>
+                    <li><a href="#about" class="has-text-grey-light">About</a></li>
+                    <li><a href="#contact" class="has-text-grey-light">Contact</a></li>
+                </ul>
+            </div>
+            <div class="column is-4">
+                <h4 class="title is-5 has-text-light">Contact Info</h4>
+                <p class="has-text-grey-light">
+                    📍
+                    {{ config.address|default:"123 Print Street, Creative District" }}<br/>
+                    📞
+                    <a href="tel:+{{ config.contact_number|default:'+442012345678' }}">Call us</a><br/>
+                    ✉️
+                    <a href="mailto:{{ config.email|default:'hello@printcraftpro.co.uk' }}">{{ config.email|default:"hello@printcraftpro.co.uk" }}</a>
+                </p>
+
+                {% if config.facebook_username or config.twitter_username or config.instagram_username or config.tiktok %}
+                    <div class="social-links mt-4">
+                        {% if config.facebook_username %}
+                            <a
+                                    href="https://facebook.com/{{ config.facebook_username }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title="Facebook"
+                            >
+                                <i class="fab fa-facebook"></i>
+                            </a>
+                        {% endif %} {% if config.twitter_username %}
+                        <a
+                                href="https://x.com/{{ config.twitter_username }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Twitter"
+                        >
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    {% endif %} {% if config.instagram_username %}
+                        <a
+                                href="https://instagram.com/{{ config.instagram_username }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Instagram"
+                        >
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    {% endif %} {% if config.tiktok %}
+                        <a
+                                href="https://www.tiktok.com/@{{ config.tiktok }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="LinkedIn"
+                        >
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                    {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <hr style="background-color: rgba(255, 255, 255, 0.1)"/>
+        <div class="has-text-centered">
+            <p class="has-text-grey-light">
+                © 2025 PeaShan Enterprises. All rights reserved.
+            </p>
+        </div>
+    </div>
+</footer>
