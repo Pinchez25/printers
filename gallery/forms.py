@@ -2,7 +2,7 @@ from django import forms
 from taggit.forms import TagWidget
 from unfold.widgets import UnfoldAdminTextInputWidget
 
-from.models import PortfolioItem
+from .models import PortfolioItem
 
 class UnfoldTagWidget(TagWidget):
     """Custom tag widget that copies unfold's TextInput styling"""
