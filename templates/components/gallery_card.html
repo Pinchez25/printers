@@ -1,0 +1,29 @@
+<div class="gallery-card animate-on-scroll">
+    <div class="gallery-item" data-src="{{ item.image.url }}">
+        <div class="gallery-card-image">
+            <img src="{{ item.image.url }}" alt="{{ item.title }}" loading="lazy">
+            <!-- Preview indicator - always visible -->
+            <div class="gallery-preview-indicator">
+                <i class="fas fa-eye"></i>
+            </div>
+            <!-- Overlay with search icon - shows on hover -->
+            <div class="gallery-card-overlay">
+                <i class="fas fa-search-plus has-text-white is-size-2"></i>
+            </div>
+        </div>
+        <div class="gallery-card-content">
+            <h3 class="title is-5 has-text-light">{{ item.title }}</h3>
+            <p class="has-text-grey-light">{{ item.description|truncatechars:60 }}</p>
+            {% if item.tags.all %}
+            <div class="gallery-card-tags">
+                {% for tag in item.tags.all|slice:":3" %}
+                <span class="gallery-tag">{{ tag.name }}</span>
+                {% endfor %}
+                {% if item.tags.all|length > 3 %}
+                <span class="gallery-tag">+{{ item.tags.all|length|add:"-3" }} more</span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
