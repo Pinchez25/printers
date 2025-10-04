@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section error-page" id="error-500">
+  <div class="error-content">
+    <img src="{% static 'Peashan.png' %}" alt="Peashan Enterprises" class="error-logo">
+    <h1 class="error-code">500</h1>
+    <h2 class="error-title">Something went wrong</h2>
+    <p class="error-subtitle">
+      We’re experiencing an internal error. Our team has been notified.
+    </p>
+
+    <div class="error-actions">
+      <a href="{% url 'gallery:index' %}" class="btn btn-primary"><i class="fas fa-home"></i>&nbsp; Back to Home</a>
+      <a href="{% url 'gallery:index' %}#contact" class="btn btn-secondary"><i class="fas fa-headset"></i>&nbsp; Contact Support</a>
+    </div>
+
+    <div class="error-help">
+      <p>You can try refreshing the page or come back later.</p>
+      <a href="javascript:location.reload();" class="error-link"><i class="fas fa-sync"></i>&nbsp; Refresh Page</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
