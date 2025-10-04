@@ -8,6 +8,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django_backblaze_b2 import BackblazeB2Storage
 from taggit.managers import TaggableManager
+from django.templatetags.static import static
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill, ResizeToFit
 
 
 def get_backblaze_storage():
@@ -27,7 +30,23 @@ class PortfolioItem(models.Model):
         populate_from="title",
         unique=True,
     )
-    image = models.ImageField(upload_to=upload_to, storage=get_backblaze_storage)
+    image = models.ImageField(
+        upload_to=upload_to, storage=get_backblaze_storage)
+
+    # Processed images via ImageKit
+    thumbnail = ImageSpecField(
+        source="image",
+        processors=[ResizeToFill(300, 300)],  # square thumbnail, crop like cover
+        format="JPEG",
+        options={"quality": 85},
+    )
+    preview = ImageSpecField(
+        source="image",
+        processors=[ResizeToFit(1600, 1200)],  # resized large for lightbox
+        format="JPEG",
+        options={"quality": 90},
+    )
+
     description: models.TextField = models.TextField(blank=True)
     is_published: models.BooleanField = models.BooleanField(default=True)
     tags: TaggableManager = TaggableManager(blank=True)
@@ -44,6 +63,33 @@ class PortfolioItem(models.Model):
     def get_absolute_url(self) -> str:
         return reverse("gallery:detail", kwargs={"slug": self.slug})
 
+    def get_image_url(self) -> str:
+        """Return full image URL, falling back to a default static image.
+
+        This method is resilient to storage/back-end errors (e.g., Backblaze B2
+        missing files or permissions) and will always return a safe URL.
+        """
+        try:
+            return self.image.url
+        except Exception:
+            # Any error (missing file, storage error, etc.) falls back to default
+            return static("default.png")
+
+    def get_thumbnail_url(self) -> str:
+        """Return thumbnail URL, falling back if image missing or inaccessible."""
+        try:
+            return self.thumbnail.url
+        except Exception:
+            # Fall back to the original image URL; that method is already safe
+            return self.get_image_url()
+
+    def get_preview_url(self) -> str:
+        """Return preview/lightbox-sized URL, falling back if missing or inaccessible."""
+        try:
+            return self.preview.url
+        except Exception:
+            return self.get_image_url()
+
     def __str__(self) -> str:
         return self.title
 
@@ -54,20 +100,30 @@ class CompanyConfig(models.Model):
 
     address = models.TextField(blank=True, help_text="Company address")
     email = models.EmailField(blank=True, help_text="Contact email")
-    contact_number = models.CharField(max_length=20, blank=True, help_text="Contact phone number e.g. 254758123456")
-    facebook_username = models.CharField(max_length=100, blank=True, help_text="Facebook username")
-    twitter_username = models.CharField(max_length=100, blank=True, help_text="Twitter handle")
-    instagram_username = models.CharField(max_length=100, blank=True, help_text="Instagram username")
-    tiktok = models.CharField(max_length=100, blank=True, help_text="TikTok username")
-    services_offered = models.JSONField(blank=True, default=list, help_text="List of services offered as a JSON array")
+    contact_number = models.CharField(
+        max_length=20, blank=True, help_text="Contact phone number e.g. 254758123456")
+    facebook_username = models.CharField(
+        max_length=100, blank=True, help_text="Facebook username")
+    twitter_username = models.CharField(
+        max_length=100, blank=True, help_text="Twitter handle")
+    instagram_username = models.CharField(
+        max_length=100, blank=True, help_text="Instagram username")
+    tiktok = models.CharField(
+        max_length=100, blank=True, help_text="TikTok username")
+    services_offered = models.JSONField(
+        blank=True, default=list, help_text="List of services offered as a JSON array")
     always_save_contactus_queries = models.BooleanField(default=False,
                                                         help_text="Always save contact form submissions to database")
 
     # Statistics for display
-    happy_customers = models.PositiveIntegerField(default=5000, help_text="Number of happy customers")
-    projects_completed = models.PositiveIntegerField(default=15000, help_text="Number of projects completed")
-    years_experience = models.PositiveIntegerField(default=8, help_text="Years of experience")
-    support_hours = models.PositiveIntegerField(default=24, help_text="Hours of support provided")
+    happy_customers = models.PositiveIntegerField(
+        default=5000, help_text="Number of happy customers")
+    projects_completed = models.PositiveIntegerField(
+        default=15000, help_text="Number of projects completed")
+    years_experience = models.PositiveIntegerField(
+        default=8, help_text="Years of experience")
+    support_hours = models.PositiveIntegerField(
+        default=24, help_text="Hours of support provided")
 
     class Meta:
         verbose_name = "Company Configuration"
@@ -92,13 +148,18 @@ class CompanyConfig(models.Model):
 
 
 class ContactQuery(models.Model):
-    name = models.CharField(max_length=200, help_text="Contact person's full name")
+    name = models.CharField(
+        max_length=200, help_text="Contact person's full name")
     email = models.EmailField(blank=True, help_text="Contact email (optional)")
-    service_required = models.CharField(max_length=100, help_text="Type of service requested")
+    service_required = models.CharField(
+        max_length=100, help_text="Type of service requested")
     message = models.TextField(help_text="Contact message or inquiry details")
-    submitted_at = models.DateTimeField(auto_now_add=True, help_text="When the inquiry was submitted")
-    ip_address = models.GenericIPAddressField(blank=True, null=True, help_text="IP address of the submitter")
-    user_agent = models.TextField(blank=True, help_text="Browser user agent string")
+    submitted_at = models.DateTimeField(
+        auto_now_add=True, help_text="When the inquiry was submitted")
+    ip_address = models.GenericIPAddressField(
+        blank=True, null=True, help_text="IP address of the submitter")
+    user_agent = models.TextField(
+        blank=True, help_text="Browser user agent string")
 
     class Meta:
         ordering = ["-submitted_at"]
