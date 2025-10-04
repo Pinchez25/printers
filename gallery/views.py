@@ -123,7 +123,7 @@ def index_view(request):
     context = {
         'latest_portfolio_items': latest_portfolio_items,
     }
-    return render(request, 'pages/index.html', context)
+    return render(request, 'index.html', context)
 
 
 def gallery_view(request):
@@ -140,7 +140,7 @@ def gallery_view(request):
         'portfolio_items': portfolio_items,
         'all_tags': all_tags,
     }
-    return render(request, 'pages/gallery.html', context)
+    return render(request, 'gallery.html', context)
 
 
 @api_view(['GET'])
@@ -150,7 +150,13 @@ def gallery_api(request):
     try:
         # Get query parameters
         search = request.GET.get('search', '').strip()
-        tags = request.GET.getlist('tags[]')  # Expect array of tags
+        # Support both CSV ?tags=a,b and array ?tags[]=a&tags[]=b
+        raw_tags_csv = request.GET.get('tags', '').strip()
+        tags = []
+        if raw_tags_csv:
+            tags = [t.strip() for t in raw_tags_csv.split(',') if t.strip()]
+        else:
+            tags = request.GET.getlist('tags[]')
         page = int(request.GET.get('page', 1))
         per_page = int(request.GET.get('per_page', 6))
 
@@ -184,8 +190,8 @@ def gallery_api(request):
                 'title': item.title,
                 'slug': item.slug,
                 'description': item.description or '',
-                'thumbnail': item.image.url if item.image else '',
-                'fullImage': item.image.url if item.image else '',
+                'thumbnail': item.get_thumbnail_url(),
+                'fullImage': item.get_preview_url(),
                 'tags': list(item.tags.names()),
                 'created_at': item.created_at.isoformat() if item.created_at else None,
             })
