@@ -1,0 +1,40 @@
+{% load static %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="{% static 'icon.ico' %}">
+<link rel="shortcut icon" href="{% static 'icon.ico' %}">
+
+<!-- Primary Meta Tags -->
+<title>{% block title %}Peashan Enterprises | Premium Printing Solutions{% endblock %}</title>
+<meta name="title" content="{% block meta_title %}Peashan Enterprises | Premium Printing Solutions{% endblock %}">
+<meta name="description" content="{% block meta_description %}Transform your ideas into stunning printed materials with exceptional quality and attention to detail. Professional printing services including business cards, banners, brochures, and more.{% endblock %}">
+<meta name="keywords" content="{% block meta_keywords %}printing services, business cards, banners, posters, brochures, logo printing, packaging, promotional products, design, print shop{% endblock %}">
+<meta name="robots" content="index, follow">
+<meta name="language" content="English">
+<meta name="author" content="Peashan Enterprises">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="{% block og_url %}https://peashanenterprises.com/{% endblock %}">
+<meta property="og:title" content="{% block og_title %}Peashan Enterprises | Premium Printing Solutions{% endblock %}">
+<meta property="og:description" content="{% block og_description %}Transform your ideas into stunning printed materials with exceptional quality and attention to detail. Professional printing services including business cards, banners, brochures, and more.{% endblock %}">
+<meta property="og:image" content="{% block og_image %}https://peashanenterprises.com/static/images/og-image.jpg{% endblock %}">
+<meta property="og:site_name" content="Peashan Enterprises">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="{% block twitter_url %}https://peashanenterprises.com/{% endblock %}">
+<meta property="twitter:title" content="{% block twitter_title %}Peashan Enterprises | Premium Printing Solutions{% endblock %}">
+<meta property="twitter:description" content="{% block twitter_description %}Transform your ideas into stunning printed materials with exceptional quality and attention to detail. Professional printing services including business cards, banners, brochures, and more.{% endblock %}">
+<meta property="twitter:image" content="{% block twitter_image %}https://peashanenterprises.com/static/images/twitter-image.jpg{% endblock %}">
+
+<!-- Stylesheets -->
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Canonical URL -->
+<link rel="canonical" href="{% block canonical_url %}https://peashanenterprises.com/{% endblock %}">
+
+{% block extra_head %}{% endblock %}
