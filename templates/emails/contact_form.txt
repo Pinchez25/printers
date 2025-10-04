@@ -1,0 +1,32 @@
+NEW CONTACT FORM INQUIRY
+========================
+
+Dear {{ config.company_name|default:"Peashan Enterprises" }} Team,
+
+You've received a new inquiry from your website contact form.
+
+INQUIRY DETAILS:
+===============
+
+Customer Name: {{ name }}
+Email Address: {{ email|default:"Not provided" }}
+Service Required: {{ service }}
+
+Message:
+{{ message }}
+
+COMPANY INFORMATION:
+===================
+{% if config.company_name %}{{ config.company_name }}{% else %}Peashan Enterprises{% endif %}
+{% if config.address %}Address: {{ config.address }}{% endif %}
+{% if config.contact_number %}Phone: {{ config.contact_number }}{% endif %}
+{% if config.email %}Email: {{ config.email }}{% endif %}
+
+ACTION REQUIRED:
+===============
+Please respond to this inquiry at your earliest convenience.
+
+This email was sent from your website contact form on {{ submitted_at|date:"Y-m-d H:i" }}.
+
+---
+Peashan Enterprises - Premium Printing Solutions
