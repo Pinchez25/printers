@@ -1,0 +1,39 @@
+{% load static %}
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobile-menu">
+    <button class="close-menu" id="close-menu">
+        <i class="fas fa-times"></i>
+    </button>
+    <a href="{% url 'gallery:index' %}" class="mobile-brand">
+        <img src="{% static 'Peashan.png' %}" alt="Peashan Enterprises Logo" class="logo-img">
+        <div class="logo-text">Peashan<span> Enterprises</span></div>
+    </a>
+  <ul class="mobile-nav-links">
+    <li class="mobile-nav-link">
+        <a href="{% if request.path == '/gallery/' %}{% url 'gallery:index' %}{% else %}#home{% endif %}">Home</a>
+    </li>
+    <li class="mobile-nav-link">
+        <a href="{% if request.path == '/gallery/' %}#{% else %}{% url 'gallery:gallery' %}{% endif %}">
+            {% if request.path == '/gallery/' %}Portfolio{% else %}Gallery{% endif %}
+        </a>
+    </li>
+    <li class="mobile-nav-link">
+        <a href="{% if request.path == '/gallery/' %}{% url 'gallery:index' %}#services{% else %}#services{% endif %}">Services</a>
+    </li>
+    <li class="mobile-nav-link">
+        <a href="{% if request.path == '/gallery/' %}{% url 'gallery:index' %}#about{% else %}#about{% endif %}">About</a>
+    </li>
+    <li class="mobile-nav-link">
+        <a href="{% if request.path == '/gallery/' %}{% url 'gallery:index' %}#contact{% else %}#contact{% endif %}">Contact</a>
+    </li>
+</ul>
+
+    {% if request.path == '/gallery/' %}
+    <div class="mobile-search">
+        <div class="search-container">
+            <input type="text" class="search-input" id="mobile-search-input" placeholder="Search portfolio...">
+            <i class="fas fa-search search-icon"></i>
+        </div>
+    </div>
+    {% endif %}
+</div>
