@@ -1,38 +1,48 @@
 {% load static %}
-<html lang="en-GB">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>
-        {% block title %}
-            PeaShan Enterprises - Professional Printing Services
-        {% endblock %}
-    </title>
-    <link rel="icon" type="image/x-icon" href="{% static 'icon.ico' %}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
-    {% block styles %}
-
-    {% endblock %}
+    {% include 'includes/head.html' %}
 </head>
-
 <body>
-<div class="progress-bar"></div>
-{% include 'components/page_loader.html' %}
-{% include 'components/navbar.html' %}
-{% block content %}
-{% endblock %}
-<!-- Footer -->
-{% include 'components/footer.html' %}
-<!-- WhatsApp Float -->
-{% include 'components/whatsapp.html' %}
+    {% include 'includes/loading_overlay.html' %}
 
-<!-- Scripts -->
-<script src="{% static 'js/lightbox.js' %}"></script>
-<script src="{% static 'js/script.js' %}"></script>
+    <!-- Navigation -->
+    {% include 'includes/navbar.html' %}
 
-{% block scripts %}
-{% endblock %}
+    {% include 'includes/mobile_menu.html' %}
+
+    <!-- Main Content Block -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include 'includes/footer.html' %}
+    {% include 'includes/whatsapp_button.html' %}
+
+    <!-- Lightbox (global modal) -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-nav">
+            <button class="nav-btn" id="prev-btn" aria-label="Previous image">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="nav-btn" id="next-btn" aria-label="Next image">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <span class="close-lightbox" id="close-lightbox" aria-label="Close lightbox">&times;</span>
+        <div class="lightbox-content">
+            <img src="" alt="" class="lightbox-img" id="lightbox-img"
+                 onerror="this.onerror=null; this.src='{% static 'default.png' %}';">
+            <div class="lightbox-info">
+                <h3 id="lightbox-title"></h3>
+                <p id="lightbox-desc"></p>
+                <div class="category" id="lightbox-category"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/index.js' %}"></script>
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>
