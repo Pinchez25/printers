@@ -1019,8 +1019,8 @@ body {
 
 .partner-item {
     flex-shrink: 0;
-    width: 150px;
-    height: 80px;
+    width: 200px;
+    height: 150px;
     display: flex;
     align-items: center;
     justify-content: center;
