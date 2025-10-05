@@ -87,7 +87,7 @@ const initContactForm = () => {
             submitBtn.textContent = 'Sending...';
             submitBtn.disabled = true;
 
-            const response = await fetch('/gallery/contact/', {
+            const response = await fetch('/contact/', {
                 method: 'POST',
                 body: formData,
                 headers: {
