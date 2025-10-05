@@ -93,26 +93,16 @@ class CompanyConfigAdmin(ModelAdmin):
 
     fieldsets = (
         ("Basic Information", {
-            "fields": ("address", "email", "contact_number", "always_save_contactus_queries"),
+            "fields": ("address", "contact_number", "always_save_contactus_queries"),
             "classes": ["tab"],
         }),
         ("Social Media", {
             "fields": ("facebook_username", "twitter_username", "instagram_username", "tiktok"),
             "classes": ["tab"],
-        }),
-        ("Services", {
-            "fields": ("services_offered",),
-            "classes": ["tab"],
-            "description": "Enter your services as a JSON array, e.g. [\"Service A\", \"Service B\"]."
-        }),
-        ("Statistics", {
-            "fields": ("happy_customers", "projects_completed", "years_experience", "support_hours"),
-            "classes": ["tab"],
-            "description": "Configure the statistics displayed on the homepage."
-        }),
+        })
     )
 
-    list_display = ['__str__', 'email', 'contact_number', 'happy_customers', 'social_links_status']
+    list_display = ['__str__', 'contact_number', 'social_links_status']
 
     @display(description="Social Media")
     def social_links_status(self, obj):
