@@ -276,7 +276,7 @@
             </div>
         </div>
     </section>
-    
+
     <!-- Testimonials Section -->
     <section class="section">
         <div class="section-header">
@@ -361,7 +361,8 @@
 
         <div class="contact-container">
             <div class="contact-form">
-                <form id="contactForm">
+                <form id="contactForm" method="post">
+                    {% csrf_token %}
                     <div class="form-group">
                         <label for="name">Full Name *</label>
                         <input type="text" id="name" name="name" required>
