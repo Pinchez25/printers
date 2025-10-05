@@ -207,18 +207,7 @@
                 <div class="detail-row">
                     <div class="detail-label">📧 Email Address</div>
                     <div class="detail-value">
-                        {% if email %}
-                            <a href="mailto:{{ email }}" style="color: #4361ee;">{{ email }}</a>
-                        {% else %}
-                            Not provided
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="detail-row">
-                    <div class="detail-label">🛠️ Service Required</div>
-                    <div class="detail-value">
-                        <span class="service-badge">{{ service }}</span>
+                        <a href="mailto:{{ email }}" style="color: #4361ee;">{{ email }}</a>
                     </div>
                 </div>
 

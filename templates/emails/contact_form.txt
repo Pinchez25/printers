@@ -9,8 +9,7 @@ INQUIRY DETAILS:
 ===============
 
 Customer Name: {{ name }}
-Email Address: {{ email|default:"Not provided" }}
-Service Required: {{ service }}
+Email Address: {{ email }}
 
 Message:
 {{ message }}
