@@ -151,8 +151,8 @@ def serialize_portfolio_item(item):
         'title': item.title,
         'slug': item.slug,
         'description': item.description or '',
-        'thumbnail': item.get_thumbnail_url(),
-        'fullImage': item.get_preview_url(),
+        'thumbnail': item.get_image_url(),
+        'fullImage': item.get_image_url(),
         'tags': list(item.tags.names()),
         'created_at': item.created_at.isoformat() if item.created_at else None,
     }

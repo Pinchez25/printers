@@ -6,15 +6,13 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
-from django_backblaze_b2 import BackblazeB2Storage
+# from django_backblaze_b2 import BackblazeB2Storage
 from taggit.managers import TaggableManager
 from django.templatetags.static import static
-from imagekit.models import ImageSpecField
-from imagekit.processors import ResizeToFill, ResizeToFit
 
 
-def get_backblaze_storage():
-    return BackblazeB2Storage()
+# def get_backblaze_storage():
+#     return BackblazeB2Storage()
 
 
 def upload_to(instance: "PortfolioItem", filename: str) -> str:
@@ -31,22 +29,9 @@ class PortfolioItem(models.Model):
         unique=True,
     )
     image = models.ImageField(
-        upload_to=upload_to, storage=get_backblaze_storage)
-
-    # Processed images via ImageKit
-    thumbnail = ImageSpecField(
-        source="image",
-        processors=[ResizeToFill(300, 300)],  # square thumbnail, crop like cover
-        format="JPEG",
-        options={"quality": 85},
-    )
-    preview = ImageSpecField(
-        source="image",
-        processors=[ResizeToFit(1600, 1200)],  # resized large for lightbox
-        format="JPEG",
-        options={"quality": 90},
-    )
-
+        upload_to=upload_to)
+    # image_ = models.ImageField(
+    #     upload_to=upload_to, storage=get_backblaze_storage)
     description: models.TextField = models.TextField(blank=True)
     is_published: models.BooleanField = models.BooleanField(default=True)
     tags: TaggableManager = TaggableManager(blank=True)
@@ -75,20 +60,6 @@ class PortfolioItem(models.Model):
             # Any error (missing file, storage error, etc.) falls back to default
             return static("default.jpg")
 
-    def get_thumbnail_url(self) -> str:
-        """Return thumbnail URL, falling back if image missing or inaccessible."""
-        try:
-            return self.thumbnail.url
-        except Exception:
-            # Fall back to the original image URL; that method is already safe
-            return self.get_image_url()
-
-    def get_preview_url(self) -> str:
-        """Return preview/lightbox-sized URL, falling back if missing or inaccessible."""
-        try:
-            return self.preview.url
-        except Exception:
-            return self.get_image_url()
 
     def __str__(self) -> str:
         return self.title
