@@ -29,7 +29,7 @@
         <div class="gallery-item" data-category="{% for tag in item.tags.all %}{{ tag.name|lower }}{% if not forloop.last %} {% endif %}{% endfor %}">
             <a href="{{ item.get_preview_url }}" class="lightbox-link">
                 <img src="{{ item.get_thumbnail_url }}" alt="{{ item.title }}" class="gallery-img"
-                     onerror="this.onerror=null; this.src='{% static 'default.png' %}';">
+                     onerror="this.onerror=null; this.src='{% static 'default.jpg' %}';">
             </a>
             <div class="gallery-overlay">
                 <h3>{{ item.title }}</h3>

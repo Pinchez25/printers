@@ -28,7 +28,7 @@
             {% for item in latest_portfolio_items %}
                 <div class="gallery-item">
                     <img src="{{ item.get_image_url }}" alt="{{ item.title }}" class="gallery-img"
-                         onerror="this.onerror=null; this.src='{% static 'default.png' %}';">
+                         onerror="this.onerror=null; this.src='{% static 'default.jpg' %}';">
                     <div class="gallery-overlay">
                         <h3>{{ item.title }}</h3>
                         <p>{{ item.description|truncatechars:100|default:"Premium printing project showcasing our quality work." }}</p>

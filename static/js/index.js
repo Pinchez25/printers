@@ -187,7 +187,7 @@ class Lightbox {
             img.src = item.fullImage;
             img.onerror = function() {
                 this.onerror = null;
-                this.src = '/static/default.png';
+                this.src = '/static/default.jpg';
             };
         }
 
@@ -303,7 +303,7 @@ const initGallery = () => {
         
         galleryItem.innerHTML = `
             <img src="${item.thumbnail}" alt="${item.title}" class="gallery-img" loading="lazy"
-                  onerror="this.onerror=null; this.src='/static/default.png';">
+                  onerror="this.onerror=null; this.src='/static/default.jpg';">
             <div class="gallery-overlay">
                 <h3>${item.title}</h3>
                 <p>${item.description || 'Premium printing project showcasing our quality work.'}</p>

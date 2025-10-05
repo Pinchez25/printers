@@ -73,7 +73,7 @@ class PortfolioItem(models.Model):
             return self.image.url
         except Exception:
             # Any error (missing file, storage error, etc.) falls back to default
-            return static("default.png")
+            return static("default.jpg")
 
     def get_thumbnail_url(self) -> str:
         """Return thumbnail URL, falling back if image missing or inaccessible."""

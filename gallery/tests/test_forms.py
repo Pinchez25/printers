@@ -75,18 +75,18 @@ class PortfolioItemFormTest(TestCase):
 
     def setUp(self):
         """Set up test data"""
-        # Use the existing default.png file from static directory
+        # Use the existing default.jpg file from static directory
         import os
         from django.conf import settings
 
         static_dir = settings.STATICFILES_DIRS[0] if settings.STATICFILES_DIRS else 'static'
-        image_path = os.path.join(static_dir, 'default.png')
+        image_path = os.path.join(static_dir, 'default.jpg')
 
         if os.path.exists(image_path):
             with open(image_path, 'rb') as f:
                 image_content = f.read()
             self.mock_image = SimpleUploadedFile(
-                name='default.png',
+                name='default.jpg',
                 content=image_content,
                 content_type='image/png'
             )
