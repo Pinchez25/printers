@@ -8,7 +8,8 @@
     <section class="hero" id="home">
         <div class="hero-content">
             <h1>Premium Printing Solutions</h1>
-            <p>Transform your ideas into stunning printed materials with exceptional quality and attention to detail. We bring your vision to life.</p>
+            <p>Transform your ideas into stunning printed materials with exceptional quality and attention to detail. We
+                bring your vision to life.</p>
             <div class="hero-buttons">
                 <a href="#contact" class="btn btn-primary">Get Started</a>
                 <a href="{% url 'gallery:gallery' %}" class="btn btn-secondary">View Portfolio</a>
@@ -25,27 +26,27 @@
 
         <div class="gallery-preview-grid">
             {% for item in latest_portfolio_items %}
-            <div class="gallery-item">
-                <img src="{{ item.get_image_url }}" alt="{{ item.title }}" class="gallery-img"
-                     onerror="this.onerror=null; this.src='{% static 'default.png' %}';">
-                <div class="gallery-overlay">
-                    <h3>{{ item.title }}</h3>
-                    <p>{{ item.description|truncatechars:100|default:"Premium printing project showcasing our quality work." }}</p>
-                    {% if item.tags.count %}
-                    <div class="tags">
-                        {% for tag in item.tags.all %}
-                            <span class="tag-pill">{{ tag.name }}</span>
-                        {% endfor %}
+                <div class="gallery-item">
+                    <img src="{{ item.get_image_url }}" alt="{{ item.title }}" class="gallery-img"
+                         onerror="this.onerror=null; this.src='{% static 'default.png' %}';">
+                    <div class="gallery-overlay">
+                        <h3>{{ item.title }}</h3>
+                        <p>{{ item.description|truncatechars:100|default:"Premium printing project showcasing our quality work." }}</p>
+                        {% if item.tags.count %}
+                            <div class="tags">
+                                {% for tag in item.tags.all %}
+                                    <span class="tag-pill">{{ tag.name }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
-                    {% endif %}
                 </div>
-            </div>
             {% empty %}
-            <div class="no-portfolio-items" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
-                <i class="fas fa-images" style="font-size: 3rem; color: var(--gray); margin-bottom: 1rem;"></i>
-                <h3>No Portfolio Items Yet</h3>
-                <p>Add some portfolio items to showcase your work!</p>
-            </div>
+                <div class="no-portfolio-items" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                    <i class="fas fa-images" style="font-size: 3rem; color: var(--gray); margin-bottom: 1rem;"></i>
+                    <h3>No Portfolio Items Yet</h3>
+                    <p>Add some portfolio items to showcase your work!</p>
+                </div>
             {% endfor %}
         </div>
 
@@ -67,7 +68,8 @@
                     <i class="fas fa-id-card"></i>
                 </div>
                 <h3>Business Cards</h3>
-                <p>Premium business cards with various finishes including matte, glossy, embossed, and foil stamping.</p>
+                <p>Premium business cards with various finishes including matte, glossy, embossed, and foil
+                    stamping.</p>
                 <ul class="service-features">
                     <li><i class="fas fa-check"></i> Multiple paper stocks</li>
                     <li><i class="fas fa-check"></i> Custom designs</li>
@@ -231,8 +233,12 @@
         <div class="about-content">
             <div class="about-text">
                 <h3>Excellence in Every Print</h3>
-                <p>At Peashan Enterprises, we've been delivering exceptional printing services for over a decade. Our commitment to quality, innovation, and customer satisfaction has made us a leader in the printing industry.</p>
-                <p>We combine state-of-the-art technology with traditional craftsmanship to produce prints that exceed expectations. From business cards to large-format banners, every project receives our meticulous attention to detail.</p>
+                <p>At Peashan Enterprises, we've been delivering exceptional printing services for over a decade. Our
+                    commitment to quality, innovation, and customer satisfaction has made us a leader in the printing
+                    industry.</p>
+                <p>We combine state-of-the-art technology with traditional craftsmanship to produce prints that exceed
+                    expectations. From business cards to large-format banners, every project receives our meticulous
+                    attention to detail.</p>
             </div>
 
             <div class="about-features">
@@ -270,7 +276,7 @@
             </div>
         </div>
     </section>
-
+    
     <!-- Testimonials Section -->
     <section class="section">
         <div class="section-header">
@@ -281,9 +287,12 @@
         <div class="testimonials-grid">
             <div class="testimonial-card">
                 <div class="testimonial-header">
-                    <img src="https://picsum.photos/seed/client1/60/60" alt="Client" class="testimonial-avatar">
+                    <div class="testimonial-avatar"
+                         style="background: #2563eb; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600;">
+                        WK
+                    </div>
                     <div class="testimonial-info">
-                        <h4>Sarah Johnson</h4>
+                        <h4>Wanjiru Kamau</h4>
                         <p>Marketing Director</p>
                     </div>
                 </div>
@@ -294,14 +303,18 @@
                     <i class="fas fa-star"></i>
                     <i class="fas fa-star"></i>
                 </div>
-                <p class="testimonial-text">"Peashan Enterprises delivered exceptional quality on our corporate branding materials. The attention to detail and professional service exceeded our expectations."</p>
+                <p class="testimonial-text">"Peashan Enterprises delivered exceptional quality on our corporate branding
+                    materials. The attention to detail and professional service exceeded our expectations."</p>
             </div>
 
             <div class="testimonial-card">
                 <div class="testimonial-header">
-                    <img src="https://picsum.photos/seed/client2/60/60" alt="Client" class="testimonial-avatar">
+                    <div class="testimonial-avatar"
+                         style="background: #059669; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600;">
+                        DO
+                    </div>
                     <div class="testimonial-info">
-                        <h4>Michael Chen</h4>
+                        <h4>David Omondi</h4>
                         <p>Business Owner</p>
                     </div>
                 </div>
@@ -312,14 +325,18 @@
                     <i class="fas fa-star"></i>
                     <i class="fas fa-star"></i>
                 </div>
-                <p class="testimonial-text">"Fast turnaround, excellent quality, and competitive pricing. I've been using their services for years and they never disappoint."</p>
+                <p class="testimonial-text">"Fast turnaround, excellent quality, and competitive pricing. I've been
+                    using their services for years and they never disappoint."</p>
             </div>
 
             <div class="testimonial-card">
                 <div class="testimonial-header">
-                    <img src="https://picsum.photos/seed/client3/60/60" alt="Client" class="testimonial-avatar">
+                    <div class="testimonial-avatar"
+                         style="background: #dc2626; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600;">
+                        AM
+                    </div>
                     <div class="testimonial-info">
-                        <h4>Emily Rodriguez</h4>
+                        <h4>Akinyi Mwangi</h4>
                         <p>Event Coordinator</p>
                     </div>
                 </div>
@@ -330,11 +347,11 @@
                     <i class="fas fa-star"></i>
                     <i class="fas fa-star"></i>
                 </div>
-                <p class="testimonial-text">"Their team went above and beyond to ensure our event materials were perfect. The banners and posters looked absolutely stunning!"</p>
+                <p class="testimonial-text">"Their team went above and beyond to ensure our event materials were
+                    perfect. The banners and posters looked absolutely stunning!"</p>
             </div>
         </div>
     </section>
-
     <!-- Contact Section -->
     <section class="section" id="contact">
         <div class="section-header">
