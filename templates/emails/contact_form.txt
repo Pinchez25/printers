@@ -19,7 +19,7 @@ COMPANY INFORMATION:
 {% if config.company_name %}{{ config.company_name }}{% else %}Peashan Enterprises{% endif %}
 {% if config.address %}Address: {{ config.address }}{% endif %}
 {% if config.contact_number %}Phone: {{ config.contact_number }}{% endif %}
-{% if config.email %}Email: {{ config.email }}{% endif %}
+Email: {{ admin_email }}
 
 ACTION REQUIRED:
 ===============

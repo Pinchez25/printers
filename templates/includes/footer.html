@@ -56,17 +56,21 @@
         <div class="footer-column">
             <h3>Contact Us</h3>
             <div class="contact-info">
+                {% if config.address %}
                 <div class="contact-item">
                     <i class="fas fa-map-marker-alt contact-icon"></i>
-                    <div>123 Print Avenue, Design District<br>New York, NY 10001</div>
+                    <div>{{ config.address }}</div>
                 </div>
+                {% endif %}
+                {% if config.contact_number %}
                 <div class="contact-item">
                     <i class="fas fa-phone contact-icon"></i>
-                    <div>(555) 123-4567</div>
+                    <div>{{ config.contact_number }}</div>
                 </div>
+                {% endif %}
                 <div class="contact-item">
                     <i class="fas fa-envelope contact-icon"></i>
-                    <div>info@peashanenterprises.com</div>
+                    <div>{{ admin_email }}</div>
                 </div>
             </div>
         </div>
