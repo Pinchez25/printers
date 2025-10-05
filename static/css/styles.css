@@ -1049,11 +1049,7 @@ body {
 .carousel-track {
   display: flex;
   gap: 3rem;
-  animation: scroll 30s linear infinite;
-}
-
-.carousel-track:hover {
-  animation-play-state: paused;
+  will-change: transform;
 }
 
 .partner-item {

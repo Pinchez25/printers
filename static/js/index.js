@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initContactForm();
     initSmoothScroll();
+    initPartnersCarousel();
 
     if (document.getElementById('galleryPreview')) {
         initGalleryPreview();
@@ -529,4 +530,38 @@ const initTypewriter = () => {
     } catch (e) {
         console.warn('Typewriter init failed:', e);
     }
+};
+
+const initPartnersCarousel = () => {
+  const track = document.querySelector('.carousel-track');
+  if (!track) return;
+
+  const items = Array.from(track.children);
+  const itemCount = Math.floor(items.length / 2);
+  const gap = 48;
+  
+  const calculateSetWidth = () => {
+    return items.slice(0, itemCount).reduce((total, item) => total + item.offsetWidth, 0) + (itemCount - 1) * gap;
+  };
+
+  const setWidth = calculateSetWidth();
+  const speed = setWidth / 1800;
+  
+  let position = 0;
+  let paused = false;
+
+  const animate = () => {
+    if (!paused) {
+      position = position <= -setWidth ? 0 : position - speed;
+      track.style.transform = `translateX(${position}px)`;
+    }
+    requestAnimationFrame(animate);
+  };
+
+  const togglePause = (isPaused) => () => paused = isPaused;
+
+  track.addEventListener('mouseenter', togglePause(true));
+  track.addEventListener('mouseleave', togglePause(false));
+
+  animate();
 };
