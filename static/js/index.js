@@ -31,10 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initMobileMenu();
     initTypewriter();
 
+    initContactForm();
+    initSmoothScroll();
+
     if (document.getElementById('galleryPreview')) {
         initGalleryPreview();
-        initContactForm();
-        initSmoothScroll();
     }
 
     if (document.getElementById('galleryGrid')) {
