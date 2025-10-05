@@ -5,9 +5,11 @@ from pathlib import Path
 from django.templatetags.static import static
 from dotenv import load_dotenv
 
-load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR/".env")
+
+
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
