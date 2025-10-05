@@ -99,7 +99,6 @@ class CompanyConfig(models.Model):
                                              help_text="Ensures only one configuration exists")
 
     address = models.TextField(blank=True, help_text="Company address")
-    email = models.EmailField(blank=True, help_text="Contact email")
     contact_number = models.CharField(
         max_length=20, blank=True, help_text="Contact phone number e.g. 254758123456")
     facebook_username = models.CharField(
@@ -110,20 +109,9 @@ class CompanyConfig(models.Model):
         max_length=100, blank=True, help_text="Instagram username")
     tiktok = models.CharField(
         max_length=100, blank=True, help_text="TikTok username")
-    services_offered = models.JSONField(
-        blank=True, default=list, help_text="List of services offered as a JSON array")
     always_save_contactus_queries = models.BooleanField(default=False,
                                                         help_text="Always save contact form submissions to database")
 
-    # Statistics for display
-    happy_customers = models.PositiveIntegerField(
-        default=5000, help_text="Number of happy customers")
-    projects_completed = models.PositiveIntegerField(
-        default=15000, help_text="Number of projects completed")
-    years_experience = models.PositiveIntegerField(
-        default=8, help_text="Years of experience")
-    support_hours = models.PositiveIntegerField(
-        default=24, help_text="Hours of support provided")
 
     class Meta:
         verbose_name = "Company Configuration"
