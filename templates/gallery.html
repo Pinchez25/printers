@@ -35,11 +35,11 @@
                 <h3>{{ item.title }}</h3>
                 <p>{{ item.description|truncatechars:100|default:"Premium printing project showcasing our quality work." }}</p>
                 {% if item.tags.count %}
-                <span class="category">
+                <div class="tags">
                     {% for tag in item.tags.all %}
-                        {{ tag.name }}{% if not forloop.last %}, {% endif %}
+                        <span class="tag-pill">{{ tag.name }}</span>
                     {% endfor %}
-                </span>
+                </div>
                 {% endif %}
                 <div class="view-btn">
                     <i class="fas fa-expand"></i>
