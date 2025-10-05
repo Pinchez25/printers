@@ -9,6 +9,7 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -20,22 +21,62 @@ from gallery.models import CompanyConfig, ContactQuery, PortfolioItem
 
 logger = logging.getLogger(__name__)
 
+HOMEPAGE_ITEMS_LIMIT = 6
+DEFAULT_PAGE_SIZE = 6
+TAGS_LIMIT = 20
+
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        return x_forwarded_for.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', '')
+
+
+def send_contact_email(name, email, message, service, config):
+    email_context = {
+        'name': name,
+        'email': email,
+        'message': message,
+        'service': service,
+        'config': config,
+        'submitted_at': timezone.now(),
+    }
+
+    html_message = render_to_string('emails/contact_form.html', email_context)
+    plain_message = render_to_string('emails/contact_form.txt', email_context)
+    recipient_email = config.email or settings.DEFAULT_FROM_EMAIL
+
+    send_mail(
+        subject=f'New Inquiry from {name}',
+        message=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[recipient_email],
+        html_message=html_message,
+        fail_silently=False,
+    )
+
 
 @require_http_methods(["POST"])
 def contact_form_view(request):
-    """Handle contact form submission via AJAX"""
     try:
-        data = json.loads(request.body)
+        if request.content_type and 'application/json' in request.content_type:
+            data = json.loads(request.body.decode('utf-8')) if request.body else {}
+        else:
+            data = request.POST.dict()
     except json.JSONDecodeError:
+        data = request.POST.dict()
+
+    name = (data.get('name') or '').strip()
+    email = (data.get('email') or '').strip()
+    service = (data.get('service') or '').strip()
+    message = (data.get('message') or '').strip()
+
+    if not all([name, email, message]):
         return JsonResponse({
             'success': False,
-            'message': 'Invalid request format.'
+            'message': 'Please provide your name, email, and message.'
         }, status=400)
-
-    name = data.get('name', '').strip()
-    email = data.get('email', '').strip()
-    service = data.get('service', '').strip()
-    message = data.get('message', '').strip()
 
     try:
         config = CompanyConfig.get_instance()
@@ -51,36 +92,14 @@ def contact_form_view(request):
             if config.always_save_contactus_queries:
                 ContactQuery.objects.create(
                     name=name,
-                    email=email or None,
+                    email=email,
                     service_required=service,
                     message=message,
                     ip_address=get_client_ip(request),
                     user_agent=request.META.get('HTTP_USER_AGENT', '')
                 )
 
-            # Send email notification
-            email_context = {
-                'name': name,
-                'email': email,
-                'service': service,
-                'message': message,
-                'config': config,
-            }
-
-            html_message = render_to_string('emails/contact_form.html', email_context)
-
-            plain_message = render_to_string('emails/contact_form.txt', email_context)
-
-            recipient_email = config.email if config.email else settings.DEFAULT_FROM_EMAIL
-
-            send_mail(
-                subject=f'New Inquiry - {service}',
-                message=plain_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[recipient_email],
-                html_message=html_message,
-                fail_silently=False,
-            )
+            send_contact_email(name, email, message, service, config)
 
         return JsonResponse({
             'success': True,
@@ -101,24 +120,10 @@ def contact_form_view(request):
         }, status=500)
 
 
-def get_client_ip(request):
-    """Get client IP address from request"""
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0].strip()
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip
-
-
 def index_view(request):
-    """Main index view"""
-    config = CompanyConfig.get_instance()
-
-    # Get latest 6 published portfolio items for homepage gallery
     latest_portfolio_items = PortfolioItem.objects.filter(
         is_published=True
-    ).select_related().prefetch_related('tags').order_by('-created_at')[:6]
+    ).prefetch_related('tags').order_by('-created_at')[:HOMEPAGE_ITEMS_LIMIT]
 
     context = {
         'latest_portfolio_items': latest_portfolio_items,
@@ -127,14 +132,11 @@ def index_view(request):
 
 
 def gallery_view(request):
-    """Gallery view with optimised queries"""
-    config = CompanyConfig.get_instance()
+    portfolio_items = PortfolioItem.objects.filter(
+        is_published=True
+    ).prefetch_related('tags')
 
-    # Get all published portfolio items with optimized query
-    portfolio_items = PortfolioItem.objects.filter(is_published=True).select_related().prefetch_related('tags')
-
-    # Get unique tags for filtering
-    all_tags = PortfolioItem.tags.most_common()[:20]  # Limit to top 20 tags for performance
+    all_tags = PortfolioItem.tags.most_common()[:TAGS_LIMIT]
 
     context = {
         'portfolio_items': portfolio_items,
@@ -143,58 +145,49 @@ def gallery_view(request):
     return render(request, 'gallery.html', context)
 
 
+def serialize_portfolio_item(item):
+    return {
+        'id': item.id,
+        'title': item.title,
+        'slug': item.slug,
+        'description': item.description or '',
+        'thumbnail': item.get_thumbnail_url(),
+        'fullImage': item.get_preview_url(),
+        'tags': list(item.tags.names()),
+        'created_at': item.created_at.isoformat() if item.created_at else None,
+    }
+
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def gallery_api(request):
-    """API endpoint for gallery data with search and filtering using Django-filter"""
     try:
-        # Get query parameters
         search = request.GET.get('search', '').strip()
-        # Support both CSV ?tags=a,b and array ?tags[]=a&tags[]=b
         raw_tags_csv = request.GET.get('tags', '').strip()
-        tags = []
-        if raw_tags_csv:
-            tags = [t.strip() for t in raw_tags_csv.split(',') if t.strip()]
-        else:
-            tags = request.GET.getlist('tags[]')
-        page = int(request.GET.get('page', 1))
-        per_page = int(request.GET.get('per_page', 6))
+        tags = [t.strip() for t in raw_tags_csv.split(',') if t.strip()] if raw_tags_csv else request.GET.getlist('tags[]')
+        
+        try:
+            page = int(request.GET.get('page', 1))
+            per_page = int(request.GET.get('per_page', DEFAULT_PAGE_SIZE))
+        except (ValueError, TypeError):
+            page = 1
+            per_page = DEFAULT_PAGE_SIZE
 
-        # Build filter parameters
         filter_params = {'is_published': True}
 
-        # Add search parameter if provided
         if search:
             filter_params['search'] = search
 
-        # Add tag parameters if provided
         if tags and 'all' not in tags:
             filter_params['tag_list'] = ','.join(tags)
 
-        # Create filter instance
         filter_instance = PortfolioItemFilter(data=filter_params, request=request)
-        queryset = filter_instance.qs
+        queryset = filter_instance.qs.prefetch_related('tags')
 
-        # Optimise with select_related and prefetch_related
-        queryset = queryset.select_related().prefetch_related('tags')
-
-        # Paginate results using Django's Paginator
         paginator = Paginator(queryset, per_page)
         page_obj = paginator.get_page(page)
 
-        # Prepare data for JSON response
-        items_data = []
-        for item in page_obj:
-            items_data.append({
-                'id': item.id,
-                'title': item.title,
-                'slug': item.slug,
-                'description': item.description or '',
-                'thumbnail': item.get_thumbnail_url(),
-                'fullImage': item.get_preview_url(),
-                'tags': list(item.tags.names()),
-                'created_at': item.created_at.isoformat() if item.created_at else None,
-            })
+        items_data = [serialize_portfolio_item(item) for item in page_obj]
 
         response_data = {
             'success': True,
@@ -218,7 +211,7 @@ def gallery_api(request):
         logger.error(f"Error in gallery API: {e}")
         return Response({
             'success': False,
-            'message': 'An error occurred while fetching gallery data.',
+            'message': 'An error occurred whilst fetching gallery data.',
             'error': str(e) if settings.DEBUG else 'Internal server error'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -226,20 +219,19 @@ def gallery_api(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def gallery_tags_api(request):
-    """API endpoint for available filter tags"""
     try:
         from .filters import get_popular_tags
 
-        # Get popular tags for PortfolioItem
-        popular_tags = get_popular_tags(limit=20)
+        popular_tags = get_popular_tags(limit=TAGS_LIMIT)
 
-        tags_data = []
-        for tag in popular_tags:
-            tags_data.append({
+        tags_data = [
+            {
                 'name': tag.name,
                 'slug': tag.slug,
-                'count': tag.item_count if hasattr(tag, 'item_count') else 0
-            })
+                'count': getattr(tag, 'item_count', 0)
+            }
+            for tag in popular_tags
+        ]
 
         response_data = {
             'success': True,
@@ -252,6 +244,7 @@ def gallery_tags_api(request):
         logger.error(f"Error in gallery tags API: {e}")
         return Response({
             'success': False,
-            'message': 'An error occurred while fetching tags.',
+            'message': 'An error occurred whilst fetching tags.',
             'error': str(e) if settings.DEBUG else 'Internal server error'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
