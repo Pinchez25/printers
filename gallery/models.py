@@ -10,6 +10,9 @@ from django.utils import timezone
 from taggit.managers import TaggableManager
 from django.templatetags.static import static
 
+from gallery.fields import AutoCleanImageField
+from gallery.storage_backends import SupabaseStorage
+
 
 # def get_backblaze_storage():
 #     return BackblazeB2Storage()
@@ -28,8 +31,9 @@ class PortfolioItem(models.Model):
         populate_from="title",
         unique=True,
     )
-    image = models.ImageField(
-        upload_to=upload_to)
+    image = AutoCleanImageField(
+        upload_to=upload_to, storage=SupabaseStorage()
+    )
     # image_ = models.ImageField(
     #     upload_to=upload_to, storage=get_backblaze_storage)
     description: models.TextField = models.TextField(blank=True)

@@ -5,6 +5,8 @@ from pathlib import Path
 from django.templatetags.static import static
 from dotenv import load_dotenv
 
+import gallery.storage_backends
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR/".env")
@@ -221,5 +223,18 @@ BACKBLAZE_CONFIG = {
     "account_info": {"type": "memory"},
 }
 
+DEFAULT_FILE_STORAGE = "gallery.storage_backends.SupabaseStorage"
+
+SUPABASE_URL = "https://mpsqpcmybupipvjwrqnr.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wc3FwY215YnVwaXB2andycW5yIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTkyNzc2NiwiZXhwIjoyMDc1NTAzNzY2fQ.Xeu6IfApqLu8Xo13TxSR9VSzxO0bVVYbffrAOAPUVfs"
+SUPABASE_BUCKET_NAME = "printers"
+
+# Optional
+SUPABASE_PUBLIC_BUCKET = False  # If True, uses direct URLs
+SUPABASE_SIGNED_URL_EXPIRES_IN = 3600  # 1 hour expiry for signed URLs
+
+SUPABASE_S3_ACCESS_KEY_ID = os.getenv("SUPABASE_S3_ACCESS_KEY_ID")
+SUPABASE_S3_SECRET_ACCESS_KEY = os.getenv("SUPABASE_S3_SECRET_ACCESS_KEY")
+SUPABASE_S3_REGION = os.getenv("SUPABASE_S3_REGION","eu-north-1")
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
