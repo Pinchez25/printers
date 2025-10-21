@@ -1,0 +1,62 @@
+{% load static %}
+<!-- Navigation -->
+<nav>
+    <div class="nav-container container">
+        <div class="logo">
+            <img
+                    src="{% static 'Peashan.png' %}"
+                    alt="Peashan Brands"
+                    class="logo-image"
+            />
+        </div>
+
+        <div class="nav-links">
+            <a href="#home" class="nav-link">Home</a>
+            <a href="#services" class="nav-link">Services</a>
+            <a href="#portfolio" class="nav-link">Portfolio</a>
+            <a href="#partners" class="nav-link">Partners</a>
+            <a href="#contact" class="nav-link">Contact</a>
+        </div>
+
+        <button
+                class="mobile-menu-btn"
+                id="mobile-menu-btn"
+                data-icon="hamburger"
+        >
+            <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    class="menu-icon hamburger-icon"
+            >
+                <path d="M3 12h18M3 6h18M3 18h18"></path>
+            </svg>
+            <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="menu-icon close-icon"
+            >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+
+    <div class="mobile-menu" id="mobile-menu" style="display: none">
+        <a href="#home" class="mobile-menu-link">Home</a>
+        <a href="#services" class="mobile-menu-link">Services</a>
+        <a href="#portfolio" class="mobile-menu-link">Portfolio</a>
+        <a href="#partners" class="mobile-menu-link">Partners</a>
+        <a href="#contact" class="mobile-menu-link">Contact</a>
+    </div>
+</nav>
