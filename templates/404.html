@@ -1,7 +1,10 @@
-{% extends 'base.html' %}
 {% load static %}
-
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'css/error.css' %}">
+</head>
+<body>
 <section class="section error-page" id="error-404">
   <div class="error-content">
     <img src="{% static 'Peashan.png' %}" alt="Peashan Enterprises" class="error-logo">
@@ -12,14 +15,16 @@
     </p>
 
     <div class="error-actions">
-      <a href="{% url 'gallery:index' %}" class="btn btn-primary"><i class="fas fa-home"></i>&nbsp; Back to Home</a>
-      <a href="{% url 'gallery:gallery' %}" class="btn btn-secondary"><i class="fas fa-images"></i>&nbsp; Explore Gallery</a>
+      <a href="/" class="btn btn-primary"><i class="fas fa-home"></i>&nbsp; Back to Home</a>
+      <a href="/#gallery" class="btn btn-secondary"><i class="fas fa-images"></i>&nbsp; Explore Gallery</a>
     </div>
 
     <div class="error-help">
       <p>Need assistance? Reach out via the contact section below.</p>
-      <a href="{% url 'gallery:index' %}#contact" class="error-link"><i class="fas fa-envelope"></i>&nbsp; Contact Us</a>
+      <a href="/#contact" class="error-link"><i class="fas fa-envelope"></i>&nbsp; Contact Us</a>
     </div>
   </div>
 </section>
-{% endblock %}
+</body>
+</html>
+

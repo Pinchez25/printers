@@ -53,6 +53,7 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -146,9 +147,11 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+WHITENOISE_USE_FINDERS = True   
+
 UNFOLD = {
-    "SITE_TITLE": "PeaShan Enterprises",
-    "SITE_HEADER": "PeaShan Enterprises",
+    "SITE_TITLE": "PeaShan Brands",
+    "SITE_HEADER": "PeaShan Brands",
     "SITE_SUBHEADER": "Your go to partner for all your printing needs.",
     "SITE_ICON": {
         "light": lambda request: static("icon.ico"),

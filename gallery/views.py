@@ -131,18 +131,23 @@ def index_view(request):
     return render(request, 'index.html', context)
 
 
-def gallery_view(request):
+def single_page_view(request):
+    """Single page application view that provides all data for the frontend"""
+    # Get all published portfolio items for the portfolio section
     portfolio_items = PortfolioItem.objects.filter(
         is_published=True
-    ).prefetch_related('tags')
+    ).prefetch_related('tags').order_by('-created_at')
 
+    # Get all tags for filtering (same as original gallery view)
     all_tags = PortfolioItem.tags.most_common()[:TAGS_LIMIT]
 
     context = {
         'portfolio_items': portfolio_items,
         'all_tags': all_tags,
     }
-    return render(request, 'gallery.html', context)
+    return render(request, 'singlepage_site.html', context)
+
+
 
 
 def serialize_portfolio_item(item):
