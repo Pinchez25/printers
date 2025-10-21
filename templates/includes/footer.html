@@ -1,0 +1,78 @@
+{% load static %}
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <img
+                        src="{% static 'Peashan.png' %}"
+                        alt="Peashan Brands"
+                        class="footer-logo-image"
+                />
+            </div>
+            <p class="footer-description">
+                Premium printing and branding solutions since 2014
+            </p>
+            <div class="footer-social">
+                {% if config.facebook_username %}
+                    <a
+                            href="https://facebook.com/{{ config.facebook_username }}"
+                            class="footer-social-link"
+                            target="_blank"
+                            rel="noopener"
+                    >
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                {% else %}
+                    <div class="footer-social-link">
+                        <i class="fab fa-facebook-f"></i>
+                    </div>
+                {% endif %} {% if config.instagram_username %}
+                <a
+                        href="https://instagram.com/{{ config.instagram_username }}"
+                        class="footer-social-link"
+                        target="_blank"
+                        rel="noopener"
+                >
+                    <i class="fab fa-instagram"></i>
+                </a>
+            {% else %}
+                <div class="footer-social-link">
+                    <i class="fab fa-instagram"></i>
+                </div>
+            {% endif %} {% if config.twitter_username %}
+                <a
+                        href="https://twitter.com/{{ config.twitter_username }}"
+                        class="footer-social-link"
+                        target="_blank"
+                        rel="noopener"
+                >
+                    <i class="fab fa-twitter"></i>
+                </a>
+            {% else %}
+                <div class="footer-social-link">
+                    <i class="fab fa-twitter"></i>
+                </div>
+            {% endif %} {% if config.tiktok %}
+                <a
+                        href="https://tiktok.com/@{{ config.tiktok }}"
+                        class="footer-social-link"
+                        target="_blank"
+                        rel="noopener"
+                >
+                    <i class="fab fa-tiktok"></i>
+                </a>
+            {% else %}
+                <div class="footer-social-link">
+                    <i class="fab fa-tiktok"></i>
+                </div>
+            {% endif %}
+            </div>
+            <div class="footer-divider">
+                <p class="footer-copyright">
+                    © 2025 Peashan Brands. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
