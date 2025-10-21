@@ -1,17 +1,17 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <link rel="stylesheet" href="{% static 'css/error.css' %}">
-</head>
-<body>
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/error.css' %}"> 
+{% endblock %}
+
+{% block content %}
 <section class="section error-page" id="error-500">
   <div class="error-content">
     <img src="{% static 'Peashan.png' %}" alt="Peashan Enterprises" class="error-logo">
     <h1 class="error-code">500</h1>
     <h2 class="error-title">Something went wrong</h2>
     <p class="error-subtitle">
-      We’re experiencing an internal error. Our team has been notified.
+      We're experiencing an internal error. Our team has been notified.
     </p>
 
     <div class="error-actions">
@@ -25,5 +25,6 @@
     </div>
   </div>
 </section>
-</body>
-</html>
+{% endblock %}
+
+{% block scripts %}{% endblock %}
