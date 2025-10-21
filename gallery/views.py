@@ -120,18 +120,9 @@ def contact_form_view(request):
         }, status=500)
 
 
-def index_view(request):
-    latest_portfolio_items = PortfolioItem.objects.filter(
-        is_published=True
-    ).prefetch_related('tags').order_by('-created_at')[:HOMEPAGE_ITEMS_LIMIT]
-
-    context = {
-        'latest_portfolio_items': latest_portfolio_items,
-    }
-    return render(request, 'index.html', context)
 
 
-def single_page_view(request):
+def index(request):
     """Single page application view that provides all data for the frontend"""
     # Get all published portfolio items for the portfolio section
     portfolio_items = PortfolioItem.objects.filter(
@@ -145,7 +136,7 @@ def single_page_view(request):
         'portfolio_items': portfolio_items,
         'all_tags': all_tags,
     }
-    return render(request, 'singlepage_site.html', context)
+    return render(request, 'index.html', context)
 
 
 
