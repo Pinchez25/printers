@@ -1,0 +1,11 @@
+{% load static %}
+<!-- Django-specific configuration -->
+<script>
+    // Make config available globally for the external JavaScript
+    window.config = {
+        contact_number: '{{ config.contact_number|default:"" }}',
+    };
+</script>
+
+<!-- Load external JavaScript file -->
+<script src="{% static 'js/main.js' %}"></script>
