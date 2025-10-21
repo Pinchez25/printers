@@ -1,22 +1,23 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <link rel="stylesheet" href="{% static 'css/error.css' %}">
-</head>
-<body>
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/error.css' %}"> 
+{% endblock %}
+
+{% block content %}
 <section class="section error-page" id="error-404">
   <div class="error-content">
     <img src="{% static 'Peashan.png' %}" alt="Peashan Enterprises" class="error-logo">
     <h1 class="error-code">404</h1>
     <h2 class="error-title">Page not found</h2>
     <p class="error-subtitle">
-      The page you’re looking for doesn’t exist or may have been moved.
+      The page you're looking for doesn't exist or may have been moved.
     </p>
 
     <div class="error-actions">
       <a href="/" class="btn btn-primary"><i class="fas fa-home"></i>&nbsp; Back to Home</a>
-      <a href="/#gallery" class="btn btn-secondary"><i class="fas fa-images"></i>&nbsp; Explore Gallery</a>
+      <a href="/#portfolio" class="btn btn-secondary"><i class="fas fa-images"></i>&nbsp; Explore Gallery</a>
     </div>
 
     <div class="error-help">
@@ -25,6 +26,7 @@
     </div>
   </div>
 </section>
-</body>
-</html>
+{% endblock %}
+
+{% block scripts %}{% endblock %}
 
