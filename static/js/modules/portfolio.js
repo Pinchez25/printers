@@ -416,8 +416,8 @@ function openLightbox(item, elements) {
   elements.lightboxImage.onload = function () {
     this.classList.add("loaded");
     imageWrapper.classList.remove("loading");
-    // Initialize Zoomist after image loads
-    initializeZoomist(elements);
+    // Initialise Zoomist after image loads
+    initialiseZoomist(elements);
   };
 
   elements.lightboxImage.onerror = function () {
@@ -425,8 +425,8 @@ function openLightbox(item, elements) {
     this.src = CONFIG.PORTFOLIO.DEFAULT_IMAGE;
     this.classList.add("loaded");
     imageWrapper.classList.remove("loading");
-    // Initialize Zoomist even on error
-    initializeZoomist(elements);
+    // Initialise Zoomist even on error
+    initialiseZoomist(elements);
   };
 
   // Set src after handlers
@@ -469,16 +469,16 @@ function setupLightboxEvents(elements) {
 }
 
 /**
- * Initialize Zoomist for the lightbox
+ * Initialise Zoomist for the lightbox
  */
-function initializeZoomist(elements) {
+function initialiseZoomist(elements) {
   if (elements.zoomistContainer && typeof Zoomist !== 'undefined') {
     // Destroy existing instance if it exists
     if (sharedZoomist) {
       sharedZoomist.destroy();
     }
 
-    // Initialize new Zoomist instance
+    // Initialise new Zoomist instance
     sharedZoomist = new Zoomist(elements.zoomistContainer, {
       maxScale: 4,
       bounds: true,
