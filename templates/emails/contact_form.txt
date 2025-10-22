@@ -11,6 +11,10 @@ INQUIRY DETAILS:
 Customer Name: {{ name }}
 Email Address: {{ email }}
 
+Phone: {{ phone|default:'N/A' }}
+
+Service Requested: {{ service_label|default:'General' }}
+
 Message:
 {{ message }}
 

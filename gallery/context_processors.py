@@ -18,6 +18,6 @@ def _get_company_config():
 def company_config(request):
     """Context processor to make CompanyConfig and email settings available globally"""
     return {
-        'config': SimpleLazyObject(_get_company_config),
+        'config': SimpleLazyObject(func=_get_company_config),
         'admin_email': settings.EMAIL_HOST_USER,
     }

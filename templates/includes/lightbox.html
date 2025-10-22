@@ -3,6 +3,17 @@
     <div class="lightbox-content">
         <div class="lightbox-image-wrapper">
             <img src="" alt="" id="lightbox-image" class="lightbox-image"/>
+            <div class="lightbox-zoom-controls">
+                <button class="lightbox-zoom-btn" id="zoom-in-btn" aria-label="Zoom in">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="lightbox-zoom-btn" id="zoom-out-btn" aria-label="Zoom out">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="lightbox-zoom-btn" id="zoom-reset-btn" aria-label="Reset zoom">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
         </div>
         <div class="lightbox-text">
             <h3 class="lightbox-title" id="lightbox-title">Delivery Van Wrap</h3>
@@ -15,17 +26,7 @@
                 id="close-lightbox"
                 aria-label="Close lightbox"
         >
-            <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-            >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
+            <i class="fas fa-times"></i>
         </button>
     </div>
 </div>

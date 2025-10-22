@@ -1,217 +1,222 @@
 <!-- Contact Section -->
 <section id="contact" class="contact">
-    <div class="container">
-        <div class="text-center">
-            <div class="tag">GET IN TOUCH</div>
-            <h2 class="section-title text-gradient">Let's Create Magic</h2>
-            <p class="section-subtitle">Transform your vision into reality</p>
-        </div>
-
-        <div class="contact-grid">
-            <div class="contact-info">
-                <div class="contact-card">
-                    <h3 class="contact-card-title">Contact Information</h3>
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <svg
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                            >
-                                <path
-                                        d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"
-                                ></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="contact-label">Phone</div>
-                            <div class="contact-value">
-                                {{ config.contact_number|default:"+254 700 000 000" }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <svg
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                            >
-                                <path
-                                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
-                                ></path>
-                                <polyline points="22,6 12,13 2,6"></polyline>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="contact-label">Email</div>
-                            <div class="contact-value">
-                                {{ admin_email |default:"info@peashan.co.ke" }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <svg
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                            >
-                                <path
-                                        d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"
-                                ></path>
-                                <circle cx="12" cy="10" r="3"></circle>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="contact-label">Location</div>
-                            <div class="contact-value">
-                                {{ config.address|default:"Nairobi, Kenya" }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="contact-card">
-                    <h3 class="contact-card-title">Follow Us</h3>
-                    <div class="social-links">
-                        {% if config.facebook_username %}
-                            <a
-                                    href="https://facebook.com/{{ config.facebook_username }}"
-                                    class="social-link"
-                                    target="_blank"
-                                    rel="noopener"
-                            >
-                                <i class="fab fa-facebook-f"></i>
-                            </a>
-                        {% else %}
-                            <div class="social-link">
-                                <i class="fab fa-facebook-f"></i>
-                            </div>
-                        {% endif %} {% if config.instagram_username %}
-                        <a
-                                href="https://instagram.com/{{ config.instagram_username }}"
-                                class="social-link"
-                                target="_blank"
-                                rel="noopener"
-                        >
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                    {% else %}
-                        <div class="social-link">
-                            <i class="fab fa-instagram"></i>
-                        </div>
-                    {% endif %} {% if config.twitter_username %}
-                        <a
-                                href="https://twitter.com/{{ config.twitter_username }}"
-                                class="social-link"
-                                target="_blank"
-                                rel="noopener"
-                        >
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                    {% else %}
-                        <div class="social-link">
-                            <i class="fab fa-twitter"></i>
-                        </div>
-                    {% endif %} {% if config.tiktok %}
-                        <a
-                                href="https://tiktok.com/@{{ config.tiktok }}"
-                                class="social-link"
-                                target="_blank"
-                                rel="noopener"
-                        >
-                            <i class="fab fa-tiktok"></i>
-                        </a>
-                    {% else %}
-                        <div class="social-link">
-                            <i class="fab fa-tiktok"></i>
-                        </div>
-                    {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="contact-form">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label class="form-label">Name</label>
-                    <input
-                            type="text"
-                            class="form-input"
-                            id="name"
-                            placeholder="Your name"
-                            required
-                    />
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input
-                            type="email"
-                            class="form-input"
-                            id="email"
-                            placeholder="your@email.com"
-                            required
-                    />
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Phone</label>
-                    <input
-                            type="tel"
-                            class="form-input"
-                            id="phone"
-                            placeholder="+254 700 000 000"
-                            required
-                    />
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Service Type</label>
-                    <select class="form-select" id="service" required>
-                        <option value="" disabled selected>Select a service</option>
-                        <option value="banners-stickers">Banners & Stickers</option>
-                        <option value="merchandise">Merchandise Branding</option>
-                        <option value="hospital-stationery">
-                            Books & Hospital Stationery
-                        </option>
-                        <option value="campaign-items">
-                            Campaign & Promotional Items
-                        </option>
-                        <option value="packaging">Packaging Solutions</option>
-                        <option value="brochures-flyers">Brochures & Flyers</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Project Description</label>
-                    <textarea
-                            class="form-textarea"
-                            id="message"
-                            placeholder="Tell us about your project..."
-                            required
-                    ></textarea>
-                </div>
-                <button class="btn-primary w-full" id="submit-form">
-                    <span>Get Your Free Quote</span>
-                    <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                    >
-                        <path d="M5 12h14M12 5l7 7-7 7"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
+  <div class="container">
+    <div class="text-center">
+      <div class="tag">GET IN TOUCH</div>
+      <h2 class="section-title text-gradient">Let's Create Magic</h2>
+      <p class="section-subtitle">Transform your vision into reality</p>
     </div>
+
+    <div class="contact-grid">
+      <div class="contact-info">
+        <div class="contact-card">
+          <h3 class="contact-card-title">Contact Information</h3>
+          <div class="contact-item">
+            <div class="contact-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <div class="contact-label">Phone</div>
+              <div class="contact-value">
+                {{ config.contact_number|default:"+254 700 000 000" }}
+              </div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                ></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+            </div>
+            <div>
+              <div class="contact-label">Email</div>
+              <div class="contact-value">
+                {{ admin_email |default:"info@peashan.co.ke" }}
+              </div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+            </div>
+            <div>
+              <div class="contact-label">Location</div>
+              <div class="contact-value">
+                {{ config.address|default:"Nairobi, Kenya" }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-card">
+          <h3 class="contact-card-title">Follow Us</h3>
+          <div class="social-links">
+            {% if config.facebook_username %}
+            <a
+              href="https://facebook.com/{{ config.facebook_username }}"
+              class="social-link"
+              target="_blank"
+              rel="noopener"
+            >
+              <i class="fab fa-facebook-f"></i>
+            </a>
+            {% else %}
+            <div class="social-link">
+              <i class="fab fa-facebook-f"></i>
+            </div>
+            {% endif %} {% if config.instagram_username %}
+            <a
+              href="https://instagram.com/{{ config.instagram_username }}"
+              class="social-link"
+              target="_blank"
+              rel="noopener"
+            >
+              <i class="fab fa-instagram"></i>
+            </a>
+            {% else %}
+            <div class="social-link">
+              <i class="fab fa-instagram"></i>
+            </div>
+            {% endif %} {% if config.twitter_username %}
+            <a
+              href="https://twitter.com/{{ config.twitter_username }}"
+              class="social-link"
+              target="_blank"
+              rel="noopener"
+            >
+              <i class="fab fa-twitter"></i>
+            </a>
+            {% else %}
+            <div class="social-link">
+              <i class="fab fa-twitter"></i>
+            </div>
+            {% endif %} {% if config.tiktok %}
+            <a
+              href="https://tiktok.com/@{{ config.tiktok }}"
+              class="social-link"
+              target="_blank"
+              rel="noopener"
+            >
+              <i class="fab fa-tiktok"></i>
+            </a>
+            {% else %}
+            <div class="social-link">
+              <i class="fab fa-tiktok"></i>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <form
+        class="contact-form"
+        method="post"
+        action="{% url 'gallery:contact_form' %}"
+      >
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input
+            type="text"
+            name="name"
+            class="form-input"
+            id="name"
+            placeholder="Your name"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input
+            type="email"
+            name="email"
+            class="form-input"
+            id="email"
+            placeholder="your@email.com"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input
+            type="tel"
+            name="phone"
+            class="form-input"
+            id="phone"
+            placeholder="+254 700 000 000"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Service Type</label>
+          <select class="form-select" id="service" name="service">
+            <option value="" disabled selected>Select a service</option>
+            <option value="other">Other</option>
+
+            <!-- existing options -->
+            <option value="banners-stickers">Banners & Stickers</option>
+            <option value="merchandise">Merchandise Branding</option>
+            <option value="hospital-stationery">
+              Books & Hospital Stationery
+            </option>
+            <option value="campaign-items">Campaign & Promotional Items</option>
+            <option value="packaging">Packaging Solutions</option>
+            <option value="brochures-flyers">Brochures & Flyers</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Project Description</label>
+          <textarea
+            name="message"
+            class="form-textarea"
+            id="message"
+            placeholder="Tell us about your project..."
+            required
+          ></textarea>
+        </div>
+        <button type="submit" class="btn-primary w-full" id="submit-form">
+          <span>Get Your Free Quote</span>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M5 12h14M12 5l7 7-7 7"></path>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </div>
 </section>

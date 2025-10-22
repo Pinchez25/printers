@@ -37,6 +37,8 @@ def send_contact_email(name, email, message, service, config):
     email_context = {
         'name': name,
         'email': email,
+
+        'phone': None,
         'message': message,
         'service': service,
         'config': config,
@@ -45,7 +47,8 @@ def send_contact_email(name, email, message, service, config):
 
     html_message = render_to_string('emails/contact_form.html', email_context)
     plain_message = render_to_string('emails/contact_form.txt', email_context)
-    recipient_email = config.email or settings.DEFAULT_FROM_EMAIL
+    # Always send to the configured host user (admin inbox) rather than reply-to customer
+    recipient_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
 
     send_mail(
         subject=f'New Inquiry from {name}',
@@ -61,7 +64,8 @@ def send_contact_email(name, email, message, service, config):
 def contact_form_view(request):
     try:
         if request.content_type and 'application/json' in request.content_type:
-            data = json.loads(request.body.decode('utf-8')) if request.body else {}
+            data = json.loads(request.body.decode(
+                'utf-8')) if request.body else {}
         else:
             data = request.POST.dict()
     except json.JSONDecodeError:
@@ -69,6 +73,7 @@ def contact_form_view(request):
 
     name = (data.get('name') or '').strip()
     email = (data.get('email') or '').strip()
+    phone = (data.get('phone') or '').strip()
     service = (data.get('service') or '').strip()
     message = (data.get('message') or '').strip()
 
@@ -96,10 +101,51 @@ def contact_form_view(request):
                     service_required=service,
                     message=message,
                     ip_address=get_client_ip(request),
-                    user_agent=request.META.get('HTTP_USER_AGENT', '')
+                    user_agent=request.META.get('HTTP_USER_AGENT', ''),
                 )
 
-            send_contact_email(name, email, message, service, config)
+            # Include phone and service in email context by passing a small wrapper
+            # We'll render templates using the same send_contact_email helper but
+            # it expects phone in context; pass phone via monkeypatch in kwargs.
+            # Simpler: render templates here and send_mail directly so phone is included.
+            # Map known service slugs to human-friendly labels
+            SERVICE_LABELS = {
+                'banners-stickers': 'Banners & Stickers',
+                'merchandise': 'Merchandise Branding',
+                'hospital-stationery': 'Books & Hospital Stationery',
+                'campaign-items': 'Campaign & Promotional Items',
+                'packaging': 'Packaging Solutions',
+                'brochures-flyers': 'Brochures & Flyers',
+                'other': 'Other',
+            }
+
+            service_label = SERVICE_LABELS.get(service, service or 'Other')
+
+            email_context = {
+                'name': name,
+                'email': email,
+                'phone': phone,
+                'message': message,
+                'service': service,
+                'service_label': service_label,
+                'config': config,
+                'submitted_at': timezone.now(),
+            }
+
+            html_message = render_to_string(
+                'emails/contact_form.html', email_context)
+            plain_message = render_to_string(
+                'emails/contact_form.txt', email_context)
+            recipient_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
+
+            send_mail(
+                subject=f'New Inquiry from {name}',
+                message=plain_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[recipient_email],
+                html_message=html_message,
+                fail_silently=False,
+            )
 
         return JsonResponse({
             'success': True,
@@ -120,8 +166,6 @@ def contact_form_view(request):
         }, status=500)
 
 
-
-
 def index(request):
     """Single page application view that provides all data for the frontend"""
     # Get all published portfolio items for the portfolio section
@@ -137,8 +181,6 @@ def index(request):
         'all_tags': all_tags,
     }
     return render(request, 'index.html', context)
-
-
 
 
 def serialize_portfolio_item(item):
@@ -160,8 +202,9 @@ def gallery_api(request):
     try:
         search = request.GET.get('search', '').strip()
         raw_tags_csv = request.GET.get('tags', '').strip()
-        tags = [t.strip() for t in raw_tags_csv.split(',') if t.strip()] if raw_tags_csv else request.GET.getlist('tags[]')
-        
+        tags = [t.strip() for t in raw_tags_csv.split(',') if t.strip()
+                ] if raw_tags_csv else request.GET.getlist('tags[]')
+
         try:
             page = int(request.GET.get('page', 1))
             per_page = int(request.GET.get('per_page', DEFAULT_PAGE_SIZE))
@@ -177,7 +220,8 @@ def gallery_api(request):
         if tags and 'all' not in tags:
             filter_params['tag_list'] = ','.join(tags)
 
-        filter_instance = PortfolioItemFilter(data=filter_params, request=request)
+        filter_instance = PortfolioItemFilter(
+            data=filter_params, request=request)
         queryset = filter_instance.qs.prefetch_related('tags')
 
         paginator = Paginator(queryset, per_page)
@@ -243,4 +287,3 @@ def gallery_tags_api(request):
             'message': 'An error occurred whilst fetching tags.',
             'error': str(e) if settings.DEBUG else 'Internal server error'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        

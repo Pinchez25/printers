@@ -1,257 +1,288 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>New Contact Form Inquiry</title>
     <style>
-        /* Reset and base styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      /* Reset and base styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333333;
-            background-color: #f8f9fa;
-        }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333333;
+        background-color: #f8f9fa;
+      }
 
-        /* Container */
+      /* Container */
+      .email-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Header */
+      .email-header {
+        background: linear-gradient(135deg, #4361ee 0%, #7209b7 100%);
+        color: white;
+        padding: 40px 30px;
+        text-align: center;
+      }
+
+      .email-header h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+
+      .email-header p {
+        font-size: 16px;
+        opacity: 0.9;
+      }
+
+      /* Content */
+      .email-content {
+        padding: 40px 30px;
+      }
+
+      .inquiry-details {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border-left: 4px solid #4361ee;
+      }
+
+      .detail-row {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e9ecef;
+      }
+
+      .detail-row:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+
+      .detail-label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+      }
+
+      .detail-value {
+        font-size: 16px;
+        color: #212529;
+        line-height: 1.5;
+      }
+
+      .service-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #4361ee 0%, #7209b7 100%);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      /* Company info */
+      .company-info {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 25px;
+        margin-top: 30px;
+      }
+
+      .company-info h3 {
+        color: #4361ee;
+        font-size: 18px;
+        margin-bottom: 15px;
+        font-weight: 600;
+      }
+
+      .company-info p {
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      /* Footer */
+      .email-footer {
+        background-color: #495057;
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .email-footer p {
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+
+      .footer-links {
+        margin-top: 20px;
+      }
+
+      .footer-links a {
+        color: #adb5bd;
+        text-decoration: none;
+        margin: 0 10px;
+        font-size: 12px;
+      }
+
+      .footer-links a:hover {
+        color: white;
+      }
+
+      /* Responsive */
+      @media (max-width: 600px) {
         .email-container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+          margin: 0;
+          border-radius: 0;
         }
 
-        /* Header */
-        .email-header {
-            background: linear-gradient(135deg, #4361ee 0%, #7209b7 100%);
-            color: white;
-            padding: 40px 30px;
-            text-align: center;
+        .email-header,
+        .email-content,
+        .email-footer {
+          padding: 30px 20px;
         }
 
         .email-header h1 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 10px;
+          font-size: 24px;
         }
+      }
 
-        .email-header p {
-            font-size: 16px;
-            opacity: 0.9;
-        }
+      /* CTA Button */
+      .cta-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #4361ee 0%, #7209b7 100%);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        margin: 20px 0;
+      }
 
-        /* Content */
-        .email-content {
-            padding: 40px 30px;
-        }
-
-        .inquiry-details {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border-left: 4px solid #4361ee;
-        }
-
-        .detail-row {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .detail-row:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-
-        .detail-label {
-            font-weight: 600;
-            color: #495057;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 5px;
-        }
-
-        .detail-value {
-            font-size: 16px;
-            color: #212529;
-            line-height: 1.5;
-        }
-
-        .service-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #4361ee 0%, #7209b7 100%);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Company info */
-        .company-info {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 25px;
-            margin-top: 30px;
-        }
-
-        .company-info h3 {
-            color: #4361ee;
-            font-size: 18px;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .company-info p {
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        /* Footer */
-        .email-footer {
-            background-color: #495057;
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .email-footer p {
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-
-        .footer-links {
-            margin-top: 20px;
-        }
-
-        .footer-links a {
-            color: #adb5bd;
-            text-decoration: none;
-            margin: 0 10px;
-            font-size: 12px;
-        }
-
-        .footer-links a:hover {
-            color: white;
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .email-container {
-                margin: 0;
-                border-radius: 0;
-            }
-
-            .email-header,
-            .email-content,
-            .email-footer {
-                padding: 30px 20px;
-            }
-
-            .email-header h1 {
-                font-size: 24px;
-            }
-        }
-
-        /* CTA Button */
-        .cta-button {
-            display: inline-block;
-            background: linear-gradient(135deg, #4361ee 0%, #7209b7 100%);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 600;
-            margin: 20px 0;
-        }
-
-        .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
-        }
+      .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="email-container">
-        <!-- Header -->
-        <div class="email-header">
-            <h1>🎨 New Contact Form Inquiry</h1>
-            <p>You've received a new inquiry from your website</p>
+      <!-- Header -->
+      <div class="email-header">
+        <h1>🎨 New Contact Form Inquiry</h1>
+        <p>You've received a new inquiry from your website</p>
+      </div>
+
+      <!-- Content -->
+      <div class="email-content">
+        <h2
+          style="
+            color: #212529;
+            margin-bottom: 25px;
+            font-size: 22px;
+            font-weight: 600;
+          "
+        >
+          Inquiry Details
+        </h2>
+
+        <div class="inquiry-details">
+          <div class="detail-row">
+            <div class="detail-label">👤 Customer Name</div>
+            <div class="detail-value">{{ name }}</div>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-label">📧 Email Address</div>
+            <div class="detail-value">
+              <a href="mailto:{{ email }}" style="color: #4361ee"
+                >{{ email }}</a
+              >
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-label">� Phone</div>
+            <div class="detail-value">{{ phone|default:'N/A' }}</div>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-label">🔖 Service Requested</div>
+            <div class="detail-value">
+              <span class="service-badge"
+                >{{ service_label|default:'General' }}</span
+              >
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-label">�💬 Message</div>
+            <div
+              class="detail-value"
+              style="
+                font-style: italic;
+                background-color: white;
+                padding: 15px;
+                border-radius: 6px;
+                border: 1px solid #e9ecef;
+              "
+            >
+              "{{ message }}"
+            </div>
+          </div>
         </div>
 
-        <!-- Content -->
-        <div class="email-content">
-            <h2 style="color: #212529; margin-bottom: 25px; font-size: 22px; font-weight: 600;">
-                Inquiry Details
-            </h2>
-
-            <div class="inquiry-details">
-                <div class="detail-row">
-                    <div class="detail-label">👤 Customer Name</div>
-                    <div class="detail-value">{{ name }}</div>
-                </div>
-
-                <div class="detail-row">
-                    <div class="detail-label">📧 Email Address</div>
-                    <div class="detail-value">
-                        <a href="mailto:{{ email }}" style="color: #4361ee;">{{ email }}</a>
-                    </div>
-                </div>
-
-                <div class="detail-row">
-                    <div class="detail-label">💬 Message</div>
-                    <div class="detail-value" style="font-style: italic; background-color: white; padding: 15px; border-radius: 6px; border: 1px solid #e9ecef;">
-                        "{{ message }}"
-                    </div>
-                </div>
-            </div>
-
-            <!-- CTA -->
-            <div style="text-align: center;">
-                <a href="mailto:{{ email }}" class="cta-button">
-                    📧 Reply to Customer
-                </a>
-            </div>
-
-            <!-- Company Info -->
-            <div class="company-info">
-                <h3>🏢 {{ config.company_name|default:"Peashan Enterprises" }}</h3>
-                {% if config.address %}
-                <p><strong>📍 Address:</strong> {{ config.address }}</p>
-                {% endif %}
-                {% if config.contact_number %}
-                <p><strong>📞 Phone:</strong> {{ config.contact_number }}</p>
-                {% endif %}
-                <p><strong>✉️ Email:</strong> {{ admin_email }}</p>
-            </div>
+        <!-- CTA -->
+        <div style="text-align: center">
+          <a href="mailto:{{ admin_email }}" class="cta-button">
+            📧 Open Admin Inbox
+          </a>
         </div>
 
-        <!-- Footer -->
-        <div class="email-footer">
-            <p><strong>Peashan Enterprises</strong></p>
-            <p>Premium Printing Solutions</p>
-            <div class="footer-links">
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
-                <a href="#">Contact Us</a>
-            </div>
-            <p style="margin-top: 20px; font-size: 12px; color: #adb5bd;">
-                This email was sent from your website contact form.
-            </p>
+        <!-- Company Info -->
+        <div class="company-info">
+          <h3>🏢 {{ config.company_name|default:"Peashan Enterprises" }}</h3>
+          {% if config.address %}
+          <p><strong>📍 Address:</strong> {{ config.address }}</p>
+          {% endif %} {% if config.contact_number %}
+          <p><strong>📞 Phone:</strong> {{ config.contact_number }}</p>
+          {% endif %}
+          <p><strong>✉️ Email:</strong> {{ admin_email }}</p>
         </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="email-footer">
+        <p><strong>Peashan Enterprises</strong></p>
+        <p>Premium Printing Solutions</p>
+        <div class="footer-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Contact Us</a>
+        </div>
+        <p style="margin-top: 20px; font-size: 12px; color: #adb5bd">
+          This email was sent from your website contact form.
+        </p>
+      </div>
     </div>
-</body>
+  </body>
 </html>
