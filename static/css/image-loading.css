@@ -1,0 +1,120 @@
+/* Image Loading States */
+
+/* Skeleton loader for portfolio images */
+.portfolio-image-wrapper {
+  position: relative;
+  background: linear-gradient(
+    90deg,
+    rgba(30, 41, 59, 0.5) 0%,
+    rgba(51, 65, 85, 0.5) 50%,
+    rgba(30, 41, 59, 0.5) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Hide image until loaded */
+.portfolio-image {
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+}
+
+.portfolio-image.loaded {
+  opacity: 1;
+}
+
+/* Lightbox image loading state */
+.lightbox-image-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(30, 41, 59, 0.3) 0%,
+    rgba(51, 65, 85, 0.3) 50%,
+    rgba(30, 41, 59, 0.3) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lightbox-image-wrapper.loading::before {
+  opacity: 1;
+}
+
+.lightbox-image {
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+  position: relative;
+  z-index: 2;
+}
+
+.lightbox-image.loaded {
+  opacity: 1;
+}
+
+/* Loading spinner for lightbox */
+.lightbox-loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(99, 102, 241, 0.2);
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.lightbox-image-wrapper.loading .lightbox-loading-spinner {
+  opacity: 1;
+}
+
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Prevent layout shift during loading */
+.portfolio-image-wrapper {
+  min-height: 200px;
+}
+
+/* Smooth fade-in for loaded images */
+@keyframes fadeInImage {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.portfolio-image.loaded,
+.lightbox-image.loaded {
+  animation: fadeInImage 0.4s ease-out forwards;
+}

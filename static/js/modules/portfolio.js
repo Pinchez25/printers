@@ -319,14 +319,30 @@ function createPortfolioItemElement(template, item, index) {
   );
   div.style.setProperty("--animation-delay", `${index * 0.1}s`);
 
-  // Set image
+  // Set image with loading state
   const img = clone.querySelector(".portfolio-image");
-  img.src = item.thumbnail || CONFIG.PORTFOLIO.DEFAULT_IMAGE;
+  const imgWrapper = clone.querySelector(".portfolio-image-wrapper");
+  
+  // Add loading class to wrapper
+  imgWrapper.classList.add("loading");
+  
   img.alt = item.title || "";
+  
+  // Handle image load
+  img.onload = function () {
+    this.classList.add("loaded");
+    imgWrapper.classList.remove("loading");
+  };
+  
   img.onerror = function () {
     this.onerror = null;
     this.src = CONFIG.PORTFOLIO.DEFAULT_IMAGE;
+    this.classList.add("loaded");
+    imgWrapper.classList.remove("loading");
   };
+  
+  // Set src after handlers are attached
+  img.src = item.thumbnail || CONFIG.PORTFOLIO.DEFAULT_IMAGE;
 
   // Set title and description
   clone.querySelector(".portfolio-title").textContent = item.title || "";
@@ -383,11 +399,32 @@ function openLightbox(item, elements) {
   const img = item.querySelector(".portfolio-image");
   const title = item.querySelector(".portfolio-title").textContent;
   const description = item.dataset.fullDescription;
+  const imageWrapper = elements.lightboxImage.parentElement;
 
-  elements.lightboxImage.src = img.src;
-  elements.lightboxImage.alt = title;
+  // Reset image state
+  elements.lightboxImage.classList.remove("loaded");
+  imageWrapper.classList.add("loading");
+
+  // Set text content
   elements.lightboxTitle.textContent = title;
   elements.lightboxDescription.textContent = description;
+  elements.lightboxImage.alt = title;
+
+  // Handle image load
+  elements.lightboxImage.onload = function () {
+    this.classList.add("loaded");
+    imageWrapper.classList.remove("loading");
+  };
+
+  elements.lightboxImage.onerror = function () {
+    this.onerror = null;
+    this.src = CONFIG.PORTFOLIO.DEFAULT_IMAGE;
+    this.classList.add("loaded");
+    imageWrapper.classList.remove("loading");
+  };
+
+  // Set src after handlers
+  elements.lightboxImage.src = img.src;
 
   show(elements.lightbox, "flex");
   document.body.style.overflow = "hidden";
