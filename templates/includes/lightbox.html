@@ -1,33 +1,32 @@
 <!-- Lightbox -->
 <div class="lightbox" id="lightbox" style="display: none">
-    <div class="lightbox-content">
-        <div class="lightbox-image-wrapper">
-            <div class="lightbox-loading-spinner"></div>
-            <img src="" alt="" id="lightbox-image" class="lightbox-image"/>
-            <div class="lightbox-zoom-controls">
-                <button class="lightbox-zoom-btn" id="zoom-in-btn" aria-label="Zoom in">
-                    <i class="fas fa-plus"></i>
-                </button>
-                <button class="lightbox-zoom-btn" id="zoom-out-btn" aria-label="Zoom out">
-                    <i class="fas fa-minus"></i>
-                </button>
-                <button class="lightbox-zoom-btn" id="zoom-reset-btn" aria-label="Reset zoom">
-                    <i class="fas fa-expand"></i>
-                </button>
-            </div>
-        </div>
-        <div class="lightbox-text">
-            <h3 class="lightbox-title" id="lightbox-title">Delivery Van Wrap</h3>
-            <p class="lightbox-description" id="lightbox-description">
-                Full vehicle branding for FoodHub
-            </p>
-        </div>
-        <button
-                class="lightbox-close-btn"
-                id="close-lightbox"
-                aria-label="Close lightbox"
-        >
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
+  <div class="lightbox-content">
+      <div class="lightbox-main">
+          <div class="zoomist-container">
+              <div class="zoomist-wrapper">
+                  <div class="zoomist-image">
+                      <div class="lightbox-loading-spinner"></div>
+                      <img src="" alt="" id="lightbox-image" class="lightbox-image"/>
+                  </div>
+              </div>
+          </div>
+          <div class="lightbox-description-panel">
+              <div class="lightbox-description-content">
+                  <h3 class="lightbox-title" id="lightbox-title">Delivery Van Wrap</h3>
+                  <div class="lightbox-description-wrapper">
+                      <p class="lightbox-description" id="lightbox-description">
+                          Full vehicle branding for FoodHub
+                      </p>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <button
+              class="lightbox-close-btn"
+              id="close-lightbox"
+              aria-label="Close lightbox"
+      >
+          <i class="fas fa-times"></i>
+      </button>
+  </div>
 </div>

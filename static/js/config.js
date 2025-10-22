@@ -9,11 +9,6 @@ export const CONFIG = {
     DEFAULT_IMAGE: '/static/default.jpg',
     API_ENDPOINT: '/api/gallery/'
   },
-  ZOOM: {
-    MIN: 1,
-    MAX: 3,
-    STEP: 0.25
-  },
   ANIMATION: {
     SCROLL_THRESHOLD: 100,
     DEBOUNCE_DELAY: 300,

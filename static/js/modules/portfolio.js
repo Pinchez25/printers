@@ -50,8 +50,12 @@ export function initPortfolio() {
   // Setup event listeners
   setupPortfolioEvents(elements, state);
   setupLightboxEvents(elements);
-  setupZoomControls(elements);
 }
+
+/**
+ * Shared Zoomist instance for lightbox
+ */
+let sharedZoomist = null;
 
 /**
  * Cache all portfolio DOM elements
@@ -75,9 +79,7 @@ function cachePortfolioElements() {
     lightboxTitle: document.getElementById("lightbox-title"),
     lightboxDescription: document.getElementById("lightbox-description"),
     closeLightbox: document.getElementById("close-lightbox"),
-    zoomInBtn: document.getElementById("zoom-in-btn"),
-    zoomOutBtn: document.getElementById("zoom-out-btn"),
-    zoomResetBtn: document.getElementById("zoom-reset-btn"),
+    zoomistContainer: document.querySelector(".zoomist-container"),
     template: document.getElementById("portfolio-item-template"),
   };
 }
@@ -414,6 +416,8 @@ function openLightbox(item, elements) {
   elements.lightboxImage.onload = function () {
     this.classList.add("loaded");
     imageWrapper.classList.remove("loading");
+    // Initialize Zoomist after image loads
+    initializeZoomist(elements);
   };
 
   elements.lightboxImage.onerror = function () {
@@ -421,6 +425,8 @@ function openLightbox(item, elements) {
     this.src = CONFIG.PORTFOLIO.DEFAULT_IMAGE;
     this.classList.add("loaded");
     imageWrapper.classList.remove("loading");
+    // Initialize Zoomist even on error
+    initializeZoomist(elements);
   };
 
   // Set src after handlers
@@ -433,28 +439,19 @@ function openLightbox(item, elements) {
 /**
  * Close lightbox
  */
-function closeLightbox(elements, zoomState) {
+function closeLightbox(elements) {
   hide(elements.lightbox);
   document.body.style.overflow = "auto";
-  resetZoom(elements, zoomState);
+  if (sharedZoomist) {
+    sharedZoomist.reset();
+  }
 }
 
 /**
  * Setup lightbox event listeners
  */
 function setupLightboxEvents(elements) {
-  const zoomState = {
-    currentZoom: 1,
-    isDragging: false,
-    startX: 0,
-    startY: 0,
-    initialX: 0,
-    initialY: 0,
-    currentTranslateX: 0,
-    currentTranslateY: 0,
-  };
-
-  const closeLightboxHandler = () => closeLightbox(elements, zoomState);
+  const closeLightboxHandler = () => closeLightbox(elements);
 
   elements.closeLightbox?.addEventListener("click", closeLightboxHandler);
 
@@ -468,153 +465,25 @@ function setupLightboxEvents(elements) {
     if (e.key === "Escape" && elements.lightbox?.style.display === "flex") {
       closeLightboxHandler();
     }
-
-    if (elements.lightbox?.style.display === "flex") {
-      if (e.key === "+" || e.key === "=") {
-        e.preventDefault();
-        zoomIn(elements, zoomState);
-      } else if (e.key === "-") {
-        e.preventDefault();
-        zoomOut(elements, zoomState);
-      } else if (e.key === "0") {
-        e.preventDefault();
-        resetZoom(elements, zoomState);
-      }
-    }
   });
 }
 
 /**
- * Setup zoom controls
+ * Initialize Zoomist for the lightbox
  */
-function setupZoomControls(elements) {
-  const zoomState = {
-    currentZoom: 1,
-    isDragging: false,
-    startX: 0,
-    startY: 0,
-    initialX: 0,
-    initialY: 0,
-    currentTranslateX: 0,
-    currentTranslateY: 0,
-  };
-
-  elements.zoomInBtn?.addEventListener("click", () =>
-    zoomIn(elements, zoomState)
-  );
-  elements.zoomOutBtn?.addEventListener("click", () =>
-    zoomOut(elements, zoomState)
-  );
-  elements.zoomResetBtn?.addEventListener("click", () =>
-    resetZoom(elements, zoomState)
-  );
-
-  elements.lightboxImage?.addEventListener(
-    "wheel",
-    (e) => {
-      e.preventDefault();
-      if (e.deltaY < 0) {
-        zoomIn(elements, zoomState);
-      } else {
-        zoomOut(elements, zoomState);
-      }
-    },
-    { passive: false }
-  );
-
-  elements.lightboxImage?.addEventListener("mousedown", (e) =>
-    handleMouseDown(e, zoomState, elements)
-  );
-  document.addEventListener("mousemove", (e) =>
-    handleMouseMove(e, zoomState, elements)
-  );
-  document.addEventListener("mouseup", () =>
-    handleMouseUp(zoomState, elements)
-  );
-}
-
-/**
- * Update image transform
- */
-function updateImageTransform(elements, zoomState) {
-  elements.lightboxImage.style.transform = `scale(${zoomState.currentZoom}) translate(${zoomState.currentTranslateX}px, ${zoomState.currentTranslateY}px)`;
-  elements.lightboxImage.classList.toggle("zoomed", zoomState.currentZoom > 1);
-}
-
-/**
- * Zoom in
- */
-function zoomIn(elements, zoomState) {
-  if (zoomState.currentZoom < CONFIG.ZOOM.MAX) {
-    zoomState.currentZoom = Math.min(
-      zoomState.currentZoom + CONFIG.ZOOM.STEP,
-      CONFIG.ZOOM.MAX
-    );
-    updateImageTransform(elements, zoomState);
-  }
-}
-
-/**
- * Zoom out
- */
-function zoomOut(elements, zoomState) {
-  if (zoomState.currentZoom > CONFIG.ZOOM.MIN) {
-    zoomState.currentZoom = Math.max(
-      zoomState.currentZoom - CONFIG.ZOOM.STEP,
-      CONFIG.ZOOM.MIN
-    );
-    if (zoomState.currentZoom === CONFIG.ZOOM.MIN) {
-      zoomState.currentTranslateX = 0;
-      zoomState.currentTranslateY = 0;
+function initializeZoomist(elements) {
+  if (elements.zoomistContainer && typeof Zoomist !== 'undefined') {
+    // Destroy existing instance if it exists
+    if (sharedZoomist) {
+      sharedZoomist.destroy();
     }
-    updateImageTransform(elements, zoomState);
+
+    // Initialize new Zoomist instance
+    sharedZoomist = new Zoomist(elements.zoomistContainer, {
+      maxScale: 4,
+      bounds: true,
+      slider: true,
+      zoomer: true
+    });
   }
-}
-
-/**
- * Reset zoom
- */
-function resetZoom(elements, zoomState) {
-  zoomState.currentZoom = CONFIG.ZOOM.MIN;
-  zoomState.currentTranslateX = 0;
-  zoomState.currentTranslateY = 0;
-  updateImageTransform(elements, zoomState);
-}
-
-/**
- * Handle mouse down for dragging
- */
-function handleMouseDown(e, zoomState, elements) {
-  if (zoomState.currentZoom > 1) {
-    zoomState.isDragging = true;
-    zoomState.startX = e.clientX;
-    zoomState.startY = e.clientY;
-    zoomState.initialX = zoomState.currentTranslateX;
-    zoomState.initialY = zoomState.currentTranslateY;
-    elements.lightboxImage.style.cursor = "grabbing";
-  }
-}
-
-/**
- * Handle mouse move for dragging
- */
-function handleMouseMove(e, zoomState, elements) {
-  if (zoomState.isDragging && zoomState.currentZoom > 1) {
-    const deltaX = e.clientX - zoomState.startX;
-    const deltaY = e.clientY - zoomState.startY;
-    zoomState.currentTranslateX =
-      zoomState.initialX + deltaX / zoomState.currentZoom;
-    zoomState.currentTranslateY =
-      zoomState.initialY + deltaY / zoomState.currentZoom;
-    updateImageTransform(elements, zoomState);
-  }
-}
-
-/**
- * Handle mouse up for dragging
- */
-function handleMouseUp(zoomState, elements) {
-  zoomState.isDragging = false;
-  elements.lightboxImage.style.cursor =
-    zoomState.currentZoom > 1 ? "grab" : "default";
 }
