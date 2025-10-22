@@ -29,25 +29,25 @@ export function initPartners() {
 
     if (isMobile) {
       return [
-        { translateX: 0, scale: 1.1, opacity: 1, zIndex: 7 },
-        { translateX: 75, scale: 0.9, opacity: 0.6, zIndex: 6 },
-        { translateX: -75, scale: 0.9, opacity: 0.6, zIndex: 6 },
-        { translateX: 150, scale: 0.6, opacity: 0.3, zIndex: 5 },
-        { translateX: -150, scale: 0.6, opacity: 0.3, zIndex: 5 },
-        { translateX: 225, scale: 0.4, opacity: 0.15, zIndex: 4 },
-        { translateX: -225, scale: 0.4, opacity: 0.15, zIndex: 4 },
+        { translateX: 0, scale: 1.0, opacity: 1, zIndex: 7 },
+        { translateX: 90, scale: 0.75, opacity: 0.5, zIndex: 6 },
+        { translateX: -90, scale: 0.75, opacity: 0.5, zIndex: 6 },
+        { translateX: 180, scale: 0.5, opacity: 0.25, zIndex: 5 },
+        { translateX: -180, scale: 0.5, opacity: 0.25, zIndex: 5 },
+        { translateX: 270, scale: 0.3, opacity: 0.1, zIndex: 4 },
+        { translateX: -270, scale: 0.3, opacity: 0.1, zIndex: 4 },
         { translateX: 0, scale: 0.2, opacity: 0, zIndex: 1 },
         { translateX: 0, scale: 0.1, opacity: 0, zIndex: 1 },
       ];
     } else if (isTablet) {
       return [
-        { translateX: 0, scale: 1.2, opacity: 1, zIndex: 7 },
-        { translateX: 150, scale: 1.0, opacity: 0.7, zIndex: 6 },
-        { translateX: -150, scale: 1.0, opacity: 0.7, zIndex: 6 },
-        { translateX: 300, scale: 0.7, opacity: 0.4, zIndex: 5 },
-        { translateX: -300, scale: 0.7, opacity: 0.4, zIndex: 5 },
-        { translateX: 450, scale: 0.4, opacity: 0.15, zIndex: 4 },
-        { translateX: -450, scale: 0.4, opacity: 0.15, zIndex: 4 },
+        { translateX: 0, scale: 1.1, opacity: 1, zIndex: 7 },
+        { translateX: 130, scale: 0.85, opacity: 0.65, zIndex: 6 },
+        { translateX: -130, scale: 0.85, opacity: 0.65, zIndex: 6 },
+        { translateX: 260, scale: 0.65, opacity: 0.35, zIndex: 5 },
+        { translateX: -260, scale: 0.65, opacity: 0.35, zIndex: 5 },
+        { translateX: 390, scale: 0.4, opacity: 0.15, zIndex: 4 },
+        { translateX: -390, scale: 0.4, opacity: 0.15, zIndex: 4 },
         { translateX: 0, scale: 0.2, opacity: 0, zIndex: 1 },
         { translateX: 0, scale: 0.1, opacity: 0, zIndex: 1 },
       ];
