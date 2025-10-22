@@ -1,0 +1,72 @@
+/* Enhanced Button Loading States */
+
+.btn-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+/* Loading state - hide text and icon, show spinner */
+.btn-primary.btn-loading .btn-text,
+.btn-primary.btn-loading .btn-icon {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.btn-primary.btn-loading .btn-spinner {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Spinner container */
+.btn-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* Modern spinner design */
+.btn-spinner-circle {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: btnSpinnerRotate 0.8s linear infinite;
+}
+
+@keyframes btnSpinnerRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Prevent hover effects while loading */
+.btn-primary.btn-loading:hover {
+  transform: none;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+}
+
+.btn-primary.btn-loading:hover i {
+  transform: none;
+}
+
+/* Smooth transitions for all button states */
+.btn-text,
+.btn-icon {
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* Accessibility - ensure loading state is announced */
+.btn-primary[aria-busy="true"] {
+  pointer-events: none;
+}
