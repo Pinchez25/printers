@@ -37,7 +37,6 @@ def send_contact_email(name, email, message, service, config):
     email_context = {
         'name': name,
         'email': email,
-
         'phone': None,
         'message': message,
         'service': service,
@@ -47,7 +46,6 @@ def send_contact_email(name, email, message, service, config):
 
     html_message = render_to_string('emails/contact_form.html', email_context)
     plain_message = render_to_string('emails/contact_form.txt', email_context)
-    # Always send to the configured host user (admin inbox) rather than reply-to customer
     recipient_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
 
     send_mail(
