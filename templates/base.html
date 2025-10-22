@@ -1,102 +1,108 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
-        {% block title %}
-        Peashan Brands - Premium Printing & Branding Solutions in Kenya
-        {% endblock %}
+      {% block title %} Peashan Brands - Premium Printing & Branding Solutions
+      in Kenya {% endblock %}
     </title>
 
     <!-- SEO Meta Tags -->
     <meta
-            name="description"
-            content="{% block meta_description %}Peashan Brands is a premium printing and branding company in Nairobi, Kenya. We specialise in banners, stickers, merchandise branding, hospital stationery, campaign items, packaging solutions, and professional marketing materials.{% endblock %}"
+      name="description"
+      content="{% block meta_description %}Peashan Brands is a premium printing and branding company in Nairobi, Kenya. We specialise in banners, stickers, merchandise branding, hospital stationery, campaign items, packaging solutions, and professional marketing materials.{% endblock %}"
     />
     <meta
-            name="keywords"
-            content="{% block meta_keywords %}printing Kenya, branding Nairobi, banners stickers, merchandise branding, hospital stationery, campaign items, packaging solutions, brochures flyers, vehicle wraps, signage Kenya, printing company Nairobi{% endblock %}"
+      name="keywords"
+      content="{% block meta_keywords %}printing Kenya, branding Nairobi, banners stickers, merchandise branding, hospital stationery, campaign items, packaging solutions, brochures flyers, vehicle wraps, signage Kenya, printing company Nairobi{% endblock %}"
     />
-    <meta name="author" content="Peashan Brands"/>
-    <meta name="robots" content="index, follow"/>
-    <link rel="canonical" href="{% block canonical_url %}https://peashan.co.ke{% endblock %}"/>
+    <meta name="author" content="Peashan Brands" />
+    <meta name="robots" content="index, follow" />
+    <link
+      rel="canonical"
+      href="{% block canonical_url %}https://peashan.co.ke{% endblock %}"
+    />
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website"/>
-    <meta property="og:url" content="{% block og_url %}https://peashan.co.ke{% endblock %}"/>
+    <meta property="og:type" content="website" />
     <meta
-            property="og:title"
-            content="{% block og_title %}Peashan Brands - Premium Printing & Branding Solutions in Kenya{% endblock %}"
+      property="og:url"
+      content="{% block og_url %}https://peashan.co.ke{% endblock %}"
     />
     <meta
-            property="og:description"
-            content="{% block og_description %}Premium printing and branding company in Nairobi, Kenya. We specialise in banners, stickers, merchandise branding, hospital stationery, campaign items, packaging solutions, and professional marketing materials.{% endblock %}"
+      property="og:title"
+      content="{% block og_title %}Peashan Brands - Premium Printing & Branding Solutions in Kenya{% endblock %}"
     />
     <meta
-            property="og:image"
-            content="{% block og_image %}https://picsum.photos/1200/630?random=peashan{% endblock %}"
+      property="og:description"
+      content="{% block og_description %}Premium printing and branding company in Nairobi, Kenya. We specialise in banners, stickers, merchandise branding, hospital stationery, campaign items, packaging solutions, and professional marketing materials.{% endblock %}"
     />
-    <meta property="og:site_name" content="Peashan Brands"/>
+    <meta
+      property="og:image"
+      content="{% block og_image %}https://picsum.photos/1200/630?random=peashan{% endblock %}"
+    />
+    <meta property="og:site_name" content="Peashan Brands" />
 
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image"/>
-    <meta property="twitter:url" content="{% block twitter_url %}https://peashan.co.ke{% endblock %}"/>
+    <meta property="twitter:card" content="summary_large_image" />
     <meta
-            property="twitter:title"
-            content="{% block twitter_title %}Peashan Brands - Premium Printing & Branding Solutions in Kenya{% endblock %}"
+      property="twitter:url"
+      content="{% block twitter_url %}https://peashan.co.ke{% endblock %}"
     />
     <meta
-            property="twitter:description"
-            content="{% block twitter_description %}Premium printing and branding company in Nairobi, Kenya. We specialise in banners, stickers, merchandise branding, hospital stationery, campaign items, packaging solutions, and professional marketing materials.{% endblock %}"
+      property="twitter:title"
+      content="{% block twitter_title %}Peashan Brands - Premium Printing & Branding Solutions in Kenya{% endblock %}"
     />
     <meta
-            property="twitter:image"
-            content="{% block twitter_image %}https://picsum.photos/1200/630?random=peashan{% endblock %}"
+      property="twitter:description"
+      content="{% block twitter_description %}Premium printing and branding company in Nairobi, Kenya. We specialise in banners, stickers, merchandise branding, hospital stationery, campaign items, packaging solutions, and professional marketing materials.{% endblock %}"
+    />
+    <meta
+      property="twitter:image"
+      content="{% block twitter_image %}https://picsum.photos/1200/630?random=peashan{% endblock %}"
     />
 
     <!-- Additional SEO -->
-    <meta name="theme-color" content="#6366f1"/>
-    <meta name="msapplication-TileColor" content="#6366f1"/>
-    <link rel="icon" type="image/png" href="{% static 'Peashan.png' %}"/>
-    <link rel="apple-touch-icon" href="{% static 'Peashan.png' %}"/>
+    <meta name="theme-color" content="#6366f1" />
+    <meta name="msapplication-TileColor" content="#6366f1" />
+    <link rel="icon" type="image/png" href="{% static 'Peashan.png' %}" />
+    <link rel="apple-touch-icon" href="{% static 'Peashan.png' %}" />
 
     <!-- Fonts and Styles -->
-    <link rel="preconnect" href="https://fonts.googleapis.com"/>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-            rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
     />
     <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}"/>
-    <link rel="stylesheet" href="{% static 'css/image-loading.css' %}"/>
-    <link rel="stylesheet" href="{% static 'css/button-loading.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/image-loading.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/button-loading.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/lightbox.css' %}" />
     <!-- Zoomist CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/zoomist@2/zoomist.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/zoomist@2/zoomist.css"
+    />
 
     {% block extra_head %}{% endblock %}
-</head>
+  </head>
 
-<body>
-<!-- Background Elements -->
-<div class="bg-elements">
-    <div class="bg-element bg-element-1" id="bg-element-1"></div>
-    <div class="bg-element bg-element-2"></div>
-    <div class="bg-element bg-element-3"></div>
-</div>
+  <body>
+    <!-- Background Elements -->
+    <div class="bg-elements">
+      <div class="bg-element bg-element-1" id="bg-element-1"></div>
+      <div class="bg-element bg-element-2"></div>
+      <div class="bg-element bg-element-3"></div>
+    </div>
 
-{% block navigation %}{% endblock %}
-
-{% block content %}{% endblock %}
-
-{% block footer %}{% endblock %}
-
-{% block scripts %}{% endblock %}
-</body>
+    {% block navigation %}{% endblock %} {% block content %}{% endblock %}
+    {%block footer %}{% endblock %} {% block scripts %}{% endblock %}
+  </body>
 </html>
