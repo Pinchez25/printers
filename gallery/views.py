@@ -184,7 +184,7 @@ def index(request):
 def serialize_portfolio_item(item):
     return {
         'id': item.id,
-        'title': item.title,
+        'title': item.title.title() if item.title else '',
         'slug': item.slug,
         'description': item.description or '',
         'thumbnail': item.get_image_url(),
