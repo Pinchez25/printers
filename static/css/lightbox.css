@@ -36,7 +36,7 @@
 .zoomist-container {
   flex: 1;
   position: relative;
-  overflow: hidden;
+  overflow: hidden; /* allow panning within bounds */
   min-height: 0;
   --zoomist-wrapper-bg-color: transparent;
   --zoomist-slider-bg-color: rgba(0, 0, 0, 0.8);
@@ -51,9 +51,22 @@
   --zoomist-zoomer-icon-color-hover: #fff;
 }
 
+/* Ensure Zoomist wrappers fill available space so the image can fully fit without cropping */
+.zoomist-wrapper,
+.zoomist-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Make sure the image scales to fit the viewport area allocated to it */
 .lightbox-image {
   width: 100%;
   height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
 }
 
@@ -127,6 +140,79 @@
 
 .lightbox-close-btn i {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (max-width: 767px) {
+  .lightbox-content {
+    padding: 10px;
+  }
+
+  .lightbox-main {
+    flex-direction: column;
+    gap: 0;
+    max-width: 98vw;
+    max-height: 98vh;
+    position: relative;
+  }
+
+  /* Let the image area take the remaining space and avoid fixed heights that cause cropping */
+  .zoomist-container {
+    flex: 1 1 auto;
+    border-radius: 8px;
+    min-height: 0; /* allow shrinking to make room for description */
+    max-height: none;
+  }
+
+  /* Place the description below the image, not overlaying it */
+  .lightbox-description-panel {
+    position: static;
+    background-color: rgba(20, 20, 20, 0.98);
+    backdrop-filter: blur(20px);
+    border-radius: 16px 16px 0 0;
+    padding: 20px;
+    max-height: 35vh; /* scroll internally if long */
+    overflow-y: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .lightbox-description-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .lightbox-description-wrapper {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .lightbox-title {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+
+  .lightbox-description {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .lightbox-close-btn {
+    top: 15px;
+    right: 15px;
+    width: 48px;
+    height: 48px;
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    z-index: 10;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .lightbox-close-btn:hover {
+    background-color: rgba(239, 68, 68, 0.9);
+    transform: scale(1.1) rotate(90deg);
+  }
 }
 
 @media (min-width: 768px) {

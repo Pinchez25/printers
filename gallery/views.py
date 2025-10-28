@@ -25,6 +25,14 @@ HOMEPAGE_ITEMS_LIMIT = 6
 DEFAULT_PAGE_SIZE = 6
 TAGS_LIMIT = 20
 
+def capitalise_first_letter(s):
+    if not s:
+        return s
+    for i, c in enumerate(s):
+        if c.isalpha():
+            return s[:i] + c.upper() + s[i+1:]
+    return s
+
 
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -184,7 +192,7 @@ def index(request):
 def serialize_portfolio_item(item):
     return {
         'id': item.id,
-        'title': item.title,
+        'title': capitalise_first_letter(item.title),
         'slug': item.slug,
         'description': item.description or '',
         'thumbnail': item.get_image_url(),
