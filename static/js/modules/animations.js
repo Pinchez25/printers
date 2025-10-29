@@ -6,9 +6,9 @@ export function initAnimations() {
 
   const FINAL_TEXT = 'Peashan Brands';
   const phrases = ['Premium Branding', 'Printing Solutions', 'Design That Delivers', FINAL_TEXT];
-  const typeSpeed = 55;
-  const backSpeed = 32;
-  const backDelay = 900;
+  const typeSpeed = 45; 
+  const backSpeed = 25; 
+  const backDelay = 800; 
   const startDelay = 300;
 
   target.setAttribute('aria-live', 'polite');
@@ -29,7 +29,8 @@ export function initAnimations() {
   function typeNextChar(str, index, onDone) {
     if (index < str.length) {
       safeSetText(str.slice(0, index + 1));
-      setTimeout(() => typeNextChar(str, index + 1, onDone), typeSpeed);
+      const speed = typeSpeed + (Math.random() - 0.5) * 20; 
+      setTimeout(() => typeNextChar(str, index + 1, onDone), speed);
     } else {
       onDone?.();
     }
@@ -38,7 +39,8 @@ export function initAnimations() {
   function backspacePrevChar(current, onDone) {
     if (current.length > 0) {
       safeSetText(current.slice(0, -1));
-      setTimeout(() => backspacePrevChar(textNode.nodeValue, onDone), backSpeed);
+      const speed = backSpeed + (Math.random() - 0.5) * 10; 
+      setTimeout(() => backspacePrevChar(textNode.nodeValue, onDone), speed);
     } else {
       onDone?.();
     }
