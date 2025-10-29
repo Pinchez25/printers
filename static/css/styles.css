@@ -2616,3 +2616,19 @@ footer {
     transform: translate3d(0, 0, 0) !important;
   }
 }
+
+
+/* --- Typewriter caret styles --- */
+.typing-caret {
+  display: inline-block;
+  width: 2px; 
+  height: 1em;
+  background-color: rgba(255, 255, 255, 0.9); 
+  margin-left: 2px;
+  vertical-align: -0.1em; 
+  animation: typing-caret-blink 1s steps(1, end) infinite;
+}
+
+@keyframes typing-caret-blink {
+  50% { opacity: 0; }
+}
