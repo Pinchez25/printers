@@ -57,23 +57,15 @@
             <div class="portfolio-item fade-in-up">
                 <div class="portfolio-image-wrapper">
                     <img class="portfolio-image" alt="" loading="lazy">
-                    <div class="portfolio-overlay">
-                        <div class="portfolio-overlay-icon">
+                    <!-- overlay becomes the interactive hover cue (icon above, title below) -->
+                    <div class="portfolio-overlay" aria-hidden="true">
+                        <div class="portfolio-overlay-icon" aria-hidden="true">
+                            <!-- opposing arrows to indicate 'open' / maximise -->
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
+                                <path d="M3 9V3h6M21 15v6h-6M21 3l-7 7M3 21l7-7" />
                             </svg>
                         </div>
-                    </div>
-                </div>
-                <div class="portfolio-content">
-                    <h3 class="portfolio-title"></h3>
-                    <p class="portfolio-description"></p>
-                    <div class="portfolio-tags"></div>
-                    <div class="portfolio-link text-gradient">
-                        <span>View Details</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M5 12h14M12 5l7 7-7 7"></path>
-                        </svg>
+                        <h3 class="portfolio-overlay-title" aria-hidden="true"></h3>
                     </div>
                 </div>
             </div>

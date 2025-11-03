@@ -291,9 +291,14 @@ function createPortfolioItemElement(template, item, index) {
 
   div.dataset.category = (item.tags || []).join(" ");
   div.dataset.itemId = item.id ?? "";
+  // keep full description in dataset so lightbox can access it without
+  // rendering the description node inside the grid
   div.dataset.fullDescription = escapeHtml(
     item.description || CONFIG.PORTFOLIO.DEFAULT_DESCRIPTION
   );
+  // store the title on the container so openLightbox can read it even
+  // if the title element isn't created in the DOM
+  div.dataset.title = item.title || "";
   div.style.setProperty(
     "--animation-delay",
     `${index * ANIMATION_DELAY_MULTIPLIER}s`
@@ -306,27 +311,13 @@ function createPortfolioItemElement(template, item, index) {
   setupImageLoading(img, imgWrapper);
   img.src = item.thumbnail || CONFIG.PORTFOLIO.DEFAULT_IMAGE;
 
-  clone.querySelector(".portfolio-title").textContent = item.title || "";
+  // set overlay title when present in template
+  const overlayTitle = clone.querySelector(".portfolio-overlay-title");
+  if (overlayTitle) overlayTitle.textContent = item.title || "";
 
-  const description =
-    item.description?.trim() || CONFIG.PORTFOLIO.DEFAULT_DESCRIPTION;
-  const truncated = truncateString(
-    description,
-    CONFIG.PORTFOLIO.DESCRIPTION_MAX_LENGTH
-  );
-  clone.querySelector(".portfolio-description").textContent = truncated;
-
-  const tagsContainer = clone.querySelector(".portfolio-tags");
-  if (item.tags?.length) {
-    item.tags.forEach((tag) => {
-      const span = document.createElement("span");
-      span.className = "portfolio-tag";
-      span.textContent = tag;
-      tagsContainer.appendChild(span);
-    });
-  } else {
-    tagsContainer.remove();
-  }
+  // store tags as a comma-separated dataset for potential filtering or
+  // accessibility use without creating tag elements in the grid
+  div.dataset.tags = (item.tags || []).join(",");
 
   return clone;
 }
@@ -348,8 +339,11 @@ function hideNoResults(elements) {
 
 function openLightbox(item, elements) {
   const img = item.querySelector(".portfolio-image");
-  const title = item.querySelector(".portfolio-title").textContent;
-  const description = item.dataset.fullDescription;
+  // title may not exist as a DOM node inside the grid anymore; prefer
+  // the dataset value (set when the element is created) and fall back to
+  // a title element if present for compatibility.
+  const title = item.dataset.title || item.querySelector(".portfolio-title")?.textContent || "";
+  const description = item.dataset.fullDescription || "";
   const imageWrapper = elements.lightboxImage.parentElement;
 
   elements.lightboxImage.classList.remove("loaded");

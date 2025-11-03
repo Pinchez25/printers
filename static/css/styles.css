@@ -1062,92 +1062,6 @@ section {
   color: rgba(241, 245, 249, 0.7);
 }
 
-.services-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2rem;
-  margin-top: 3rem;
-}
-
-.service-card {
-  background: rgba(30, 41, 59, 0.5);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 2.5rem;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  height: auto !important;
-}
-
-.service-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--gradient);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.service-card:hover::before {
-  opacity: 0.1;
-}
-
-.service-card:hover {
-  transform: translateY(-10px);
-  border-color: var(--primary);
-  box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
-}
-
-.service-icon {
-  width: 70px;
-  height: 70px;
-  background: var(--gradient);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  transition: all 0.4s ease;
-}
-
-.service-card:hover .service-icon {
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: var(--shadow-glow);
-}
-
-.service-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--white);
-  margin-bottom: 1rem;
-}
-
-.service-description {
-  color: rgba(241, 245, 249, 0.8);
-  line-height: 1.8;
-  margin-bottom: 1.5rem;
-}
-
-.service-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: gap 0.3s ease;
-}
-
-.service-card:hover .service-link {
-  gap: 1rem;
-}
-
 .portfolio {
   background: rgba(30, 41, 59, 0.3);
   position: relative;
@@ -1261,24 +1175,24 @@ section {
 }
 
 .portfolio-grid {
+  /* larger cards: favor fewer columns with bigger tiles */
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 2rem;
-  margin-top: 3rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin-top: 2rem;
   position: relative;
-  min-height: 400px;
+  /* remove forced min-height so the grid only takes the space of its items */
 }
 
 .portfolio-item {
-  background: rgba(30, 41, 59, 0.5);
-  border-radius: 20px;
+  /* make the image the focal point; remove heavy card chrome */
+  background: transparent;
+  border-radius: 12px;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.36s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.36s;
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  border: none;
   position: relative;
-  z-index: 1;
 }
 
 .portfolio-item.animate-in {
@@ -1286,26 +1200,23 @@ section {
 }
 
 .portfolio-item:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
-  border-color: var(--primary);
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), 0 6px 20px rgba(99, 102, 241, 0.08);
 }
 
 .portfolio-item::before {
+  /* subtle vignette that appears on hover to emphasize the title */
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    135deg,
-    rgba(99, 102, 241, 0.1) 0%,
-    rgba(236, 72, 153, 0.1) 100%
-  );
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.18) 0%, transparent 60%);
   opacity: 0;
-  transition: opacity 0.4s ease;
-  z-index: -1;
+  transition: opacity 0.28s ease;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .portfolio-item:hover::before {
@@ -1315,7 +1226,10 @@ section {
 .portfolio-image-wrapper {
   position: relative;
   overflow: hidden;
+  /* larger cards use a slightly taller ratio for better presentation */
   aspect-ratio: 4/3;
+  background: rgba(0,0,0,0.04);
+  min-height: 200px;
 }
 
 .portfolio-image {
@@ -1335,76 +1249,63 @@ section {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    135deg,
-    rgba(99, 102, 241, 0.9) 0%,
-    rgba(236, 72, 153, 0.8) 100%
-  );
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.6rem;
+  padding: 1rem 1.25rem;
+  text-align: center;
   opacity: 0;
-  transition: opacity 0.4s ease;
-  backdrop-filter: blur(2px);
+  transition: opacity 0.28s ease, background 0.28s ease, transform 0.28s ease;
+  pointer-events: none;
+  transform: translateY(6px);
+}
+
+@media (min-width: 1024px) {
+  .portfolio-grid {
+    /* target 3 cards per row: container is 1280px, minus padding/gaps ~= 380px per card */
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .portfolio-image-wrapper {
+    aspect-ratio: 4/3;
+    min-height: 240px;
+  }
 }
 
 .portfolio-item:hover .portfolio-overlay {
   opacity: 1;
+  transform: translateY(0);
+  background: linear-gradient(to top, rgba(2,6,23,0.72), rgba(2,6,23,0.18));
 }
 
 .portfolio-overlay-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--white);
-  transform: scale(0.8);
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+  transition: transform 0.28s ease, opacity 0.28s ease;
 }
 
 .portfolio-item:hover .portfolio-overlay-icon {
-  transform: scale(1);
+  transform: translateY(-2px) scale(1.02);
 }
 
-.portfolio-content {
-  padding: 1.5rem;
-  position: relative;
-  z-index: 2;
-}
-
-.portfolio-title {
-  font-size: 1.3rem;
-  font-weight: 700;
+.portfolio-overlay-title {
+  font-size: 1.05rem;
+  font-weight: 800;
   color: var(--white);
-  margin-bottom: 0.5rem;
+  margin: 0;
+  text-align: center;
+  text-shadow: 0 8px 22px rgba(2,6,23,0.7);
+  letter-spacing: -0.2px;
 }
 
-.portfolio-description {
-  color: rgba(241, 245, 249, 0.7);
-  margin-bottom: 1rem;
-}
-
-.portfolio-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  transition: gap 0.3s ease;
-  color: var(--primary-light);
-  text-decoration: none;
-}
-
-.portfolio-link:hover {
-  color: var(--primary);
-}
-
-.portfolio-item:hover .portfolio-link {
-  gap: 1rem;
-}
-
-.portfolio-tags {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-}
+/* textual elements are intentionally not rendered inside the grid -
+  their data is stored on the item element (data-title, data-full-description, data-tags)
+  so the lightbox and filtering logic can continue to work. */
 
 .portfolio-tag {
   background: rgba(99, 102, 241, 0.1);
@@ -2199,9 +2100,7 @@ footer {
     }
   }
 
-  .services-grid {
-    grid-template-columns: 1fr;
-  }
+ 
 
   .portfolio-grid {
     grid-template-columns: 1fr;
@@ -2305,8 +2204,7 @@ footer {
   }
 
   /* Prevent momentum scrolling issues */
-  .portfolio-grid,
-  .services-grid {
+  .portfolio-grid {
     -webkit-overflow-scrolling: auto;
   }
 }
@@ -2386,10 +2284,6 @@ footer {
     font-size: 2rem;
   }
 
-  .service-card {
-    padding: 2rem;
-    max-width: 100%;
-  }
 
   .contact-card {
     padding: 1.25rem;

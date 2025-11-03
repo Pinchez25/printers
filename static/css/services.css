@@ -1,0 +1,159 @@
+#services {
+      padding: 6rem 0;
+      background: linear-gradient(to bottom, #111827, #1f2937);
+    }
+
+    .services-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      text-align: center;
+    }
+
+    .services-header-content {
+      text-align: center;
+    }
+
+    .services-tag {
+      display: inline-block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #60a5fa;
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(96, 165, 250, 0.3);
+      border-radius: 2rem;
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards;
+    }
+
+    .services-section-title {
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.1s forwards;
+    }
+
+    .services-text-gradient {
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .services-section-subtitle {
+      font-size: 1.125rem;
+      color: #d1d5db;
+      margin-bottom: 4rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.2s forwards;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .services-glass-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 2rem;
+      color: #fff;
+      opacity: 0;
+      transform: translateY(8px) scale(0.995);
+      animation: zoomIn 0.6s ease forwards;
+      transition: transform 0.32s cubic-bezier(0.2,0,0.2,1), box-shadow 0.32s, border-color 0.32s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: center;
+      text-align: center;
+    }
+
+    .services-glass-card:nth-child(1) { animation-delay: 0.1s; }
+    .services-glass-card:nth-child(2) { animation-delay: 0.2s; }
+    .services-glass-card:nth-child(3) { animation-delay: 0.3s; }
+    .services-glass-card:nth-child(4) { animation-delay: 0.4s; }
+    .services-glass-card:nth-child(5) { animation-delay: 0.5s; }
+    .services-glass-card:nth-child(6) { animation-delay: 0.6s; }
+
+    .services-glass-card:hover {
+      transform: translateY(-10px) scale(1.01);
+      box-shadow: 0 30px 60px rgba(2,6,23,0.55), 0 8px 24px rgba(99,102,241,0.06);
+      border-color: rgba(99,102,241,0.14);
+    }
+
+    .services-icon {
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(236,72,153,0.08));
+      border-radius: 12px;
+      margin-bottom: 0.25rem;
+      transition: transform 0.28s ease, box-shadow 0.28s ease;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .services-glass-card:hover .services-icon {
+      transform: translateY(-4px) rotate(6deg) scale(1.06);
+      box-shadow: 0 8px 20px rgba(99,102,241,0.12);
+    }
+
+    .services-card-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .services-card-description {
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes zoomIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @media (min-width: 768px) {
+      .services-section-title {
+        font-size: 3.75rem;
+      }
+
+      .services-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .services-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
