@@ -1,290 +1,572 @@
+/* ============================================
+   LIGHTBOX STYLING - Responsive & Beautiful
+   ============================================ */
 
-.zoomist-zoomer{
-    background-color: rgba(0, 0, 0, 0.7);
+/* Root CSS Variables for Zoomist Library */
+:root {
+    --zoomist-wrapper-bg-color: transparent;
+    --zoomist-modules-tranistion-duration: 0.3s;
+    /* Slider CSS variables */
+    --zoomist-slider-bg-color: rgba(0, 0, 0, 0.8);
+    --zoomist-slider-border-radius: 0 0 4px 0;
+    --zoomist-slider-padding-x: 20px;
+    --zoomist-slider-padding-y: 20px;
+    --zoomist-slider-track-color: rgba(255, 255, 255, 0.2);
+    --zoomist-slider-track-color-hover: rgba(255, 255, 255, 0.3);
+    --zoomist-slider-bar-size: 120px;
+    --zoomist-slider-bar-side: 3px;
+    --zoomist-slider-bar-border-radius: 3px;
+    --zoomist-slider-bar-color: rgba(255, 255, 255, 0.6);
+    --zoomist-slider-bar-color-hover: rgba(255, 255, 255, 0.8);
+    --zoomist-slider-button-size: 14px;
+    --zoomist-slider-button-color: #ffffff;
+    /* Zoomer CSS variables */
+    --zoomist-zoomer-button-size: 48px;
+    --zoomist-zoomer-button-color: rgba(255, 255, 255, 0.8);
+    --zoomist-zoomer-button-color-hover: rgba(255, 255, 255, 0.95);
+    --zoomist-zoomer-button-color-disabled: rgba(255, 255, 255, 0.4);
+    --zoomist-zoomer-button-opacity-disabled: 0.5;
+    --zoomist-zoomer-icon-size: 14px;
+    --zoomist-zoomer-icon-color: #000;
+    --zoomist-zoomer-icon-color-hover: #000;
+    --zoomist-zoomer-icon-color-disabled: #666;
 }
 
+/* Main Lightbox Container */
 .lightbox {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.95);
-  z-index: 9999;
-  overflow: hidden;
-  backdrop-filter: blur(10px);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-in-out;
+    overflow: hidden;
 }
 
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+    to {
+        opacity: 1;
+        backdrop-filter: blur(4px);
+    }
+}
+
+/* Lightbox Content Wrapper */
 .lightbox-content {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
+    position: relative;
+    width: 95%;
+    max-width: 1200px;
+    height: 90vh;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 255, 255, 0.1);
+    display: flex;
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
 }
 
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Main Content Area */
 .lightbox-main {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  width: 100%;
-  height: 100%;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    gap: 0;
 }
 
+/* Image Container */
 .zoomist-container {
-  flex: 1;
-  position: relative;
-  overflow: hidden; /* allow panning within bounds */
-  min-height: 0;
-  --zoomist-wrapper-bg-color: transparent;
-  --zoomist-slider-bg-color: rgba(0, 0, 0, 0.8);
-  --zoomist-slider-track-color: #444;
-  --zoomist-slider-track-color-hover: #666;
-  --zoomist-slider-bar-color: #222;
-  --zoomist-slider-bar-color-hover: #444;
-  --zoomist-slider-button-color: #000;
-  --zoomist-zoomer-button-color: rgba(255, 255, 255, 0.1);
-  --zoomist-zoomer-button-color-hover: rgba(255, 255, 255, 0.2);
-  --zoomist-zoomer-icon-color: #fff;
-  --zoomist-zoomer-icon-color-hover: #fff;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+    /* Zoomist CSS Variables */
+    --zoomist-wrapper-bg-color: transparent;
+    --zoomist-modules-tranistion-duration: 0.3s;
 }
 
-/* Ensure Zoomist wrappers fill available space so the image can fully fit without cropping */
-.zoomist-wrapper,
+.zoomist-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
 .zoomist-image {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
-/* Make sure the image scales to fit the viewport area allocated to it */
 .lightbox-image {
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    animation: imageZoom 0.5s ease-out;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
 }
 
+@keyframes imageZoom {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Loading Spinner */
 .lightbox-loading-spinner {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 50px;
-  height: 50px;
-  border: 4px solid rgba(255, 255, 255, 0.2);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: lightbox-spinner-rotate 0.8s linear infinite;
-  z-index: 1;
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: lightbox-spin  0.8s linear infinite;
+    z-index: 10;
+    display: none;
 }
 
-@keyframes lightbox-spinner-rotate {
-  to { transform: translate(-50%, -50%) rotate(360deg); }
+.lightbox-loading-spinner.active {
+    display: block;
 }
 
+@keyframes lightbox-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Description Panel */
 .lightbox-description-panel {
-  background-color: rgba(20, 20, 20, 0.95);
-  padding: 16px 20px;
-  max-height: 30vh;
-  overflow-y: auto;
+    width: 350px;
+    background: linear-gradient(180deg, #1a1a1a 0%, #141414 100%);
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-y: auto;
+    animation: slideInRight 0.4s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Scrollbar Styling for Description Panel */
+.lightbox-description-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.lightbox-description-panel::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.lightbox-description-panel::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    transition: background 0.3s ease;
+}
+
+.lightbox-description-panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* Description Content */
+.lightbox-description-content {
+    width: 100%;
 }
 
 .lightbox-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #fff;
-  margin: 0 0 8px 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 20px 0;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+.lightbox-description-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .lightbox-description {
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.6;
+    margin: 0;
+    word-break: break-word;
 }
 
+/* Close Button */
 .lightbox-close-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 40px;
-  height: 40px;
-  background-color: rgba(0, 0, 0, 0.6);
-  border: none;
-  border-radius: 50%;
-  color: #fff;
-  font-size: 1.25rem;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  backdrop-filter: blur(10px);
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 30;
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.3s ease-out 0.1s both;
 }
 
 .lightbox-close-btn:hover {
-  background-color: rgba(239, 68, 68, 0.9);
-  transform: scale(1.1) rotate(90deg);
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: rotate(90deg) scale(1.1);
 }
 
 .lightbox-close-btn:active {
-  transform: scale(0.95) rotate(90deg);
+    transform: rotate(90deg) scale(0.95);
 }
 
-.lightbox-close-btn i {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* ============================================
+   RESPONSIVE DESIGN - TABLETS (768px and down)
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .lightbox-content {
+        height: 85vh;
+        max-width: 98%;
+    }
+
+    .lightbox-description-panel {
+        width: 280px;
+        padding: 30px 20px;
+    }
+
+    .lightbox-title {
+        font-size: 24px;
+    }
+
+    .lightbox-description {
+        font-size: 14px;
+    }
+
+    .lightbox-close-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
 }
 
-@media (max-width: 767px) {
-  .lightbox-content {
-    padding: 10px;
-  }
+@media (max-width: 768px) {
+    .lightbox {
+        height: 100vh;
+        padding: 20px;
+    }
 
-  .lightbox-main {
-    flex-direction: column;
-    gap: 0;
-    max-width: 98vw;
-    max-height: 98vh;
-    position: relative;
-  }
+    .lightbox-content {
+        flex-direction: column;
+        height: 100%;
+        max-height: calc(100vh - 40px);
+        border-radius: 12px;
+        gap: 0;
+    }
 
-  /* Let the image area take the remaining space and avoid fixed heights that cause cropping */
-  .zoomist-container {
-    flex: 1 1 auto;
-    border-radius: 8px;
-    min-height: 0; /* allow shrinking to make room for description */
-    max-height: none;
-  }
+    .lightbox-main {
+        flex-direction: column;
+        flex: 1;
+        gap: 0;
+    }
 
-  /* Place the description below the image, not overlaying it */
-  .lightbox-description-panel {
-    position: static;
-    background-color: rgba(20, 20, 20, 0.98);
-    backdrop-filter: blur(20px);
-    border-radius: 16px 16px 0 0;
-    padding: 20px;
-    max-height: 35vh; /* scroll internally if long */
-    overflow-y: auto;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    z-index: 1;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-  }
+    /* Image Container on Mobile - Make it taller */
+    .zoomist-container {
+        flex: 0 0 65%;
+        min-height: 300px;
+        border-radius: 12px 12px 0 0;
+    }
 
-  .lightbox-description-content {
-    display: flex;
-    flex-direction: column;
-  }
+    /* Description Panel on Mobile - Shorter to show image better */
+    .lightbox-description-panel {
+        width: 100%;
+        flex: 0 0 35%;
+        padding: 20px;
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0 0 12px 12px;
+        animation: slideInUp 0.4s ease-out;
+    }
 
-  .lightbox-description-wrapper {
-    flex: 1;
-    overflow-y: auto;
-  }
+    @keyframes slideInUp {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
 
-  .lightbox-title {
-    font-size: 1.4rem;
-    margin-bottom: 10px;
-    font-weight: 700;
-  }
+    .lightbox-title {
+        font-size: 20px;
+        margin-bottom: 12px;
+    }
 
-  .lightbox-description {
-    font-size: 1rem;
-    line-height: 1.6;
-  }
+    .lightbox-description {
+        font-size: 13px;
+        line-height: 1.5;
+    }
 
-  .lightbox-close-btn {
-    top: 15px;
-    right: 15px;
-    width: 48px;
-    height: 48px;
-    background-color: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(15px);
-    z-index: 10;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
+    .lightbox-close-btn {
+        top: 15px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
 
-  .lightbox-close-btn:hover {
-    background-color: rgba(239, 68, 68, 0.9);
-    transform: scale(1.1) rotate(90deg);
-  }
+    .lightbox-image {
+        border-radius: 8px;
+    }
+
+    /* Adjust zoomist controls position on mobile */
+    .zoomist-zoomer {
+        bottom: auto;
+        top: 60px;
+        right: 15px;
+    }
 }
 
-@media (min-width: 768px) {
-  .lightbox-content {
-    padding: 20px;
-  }
+/* ============================================
+   RESPONSIVE DESIGN - SMALL DEVICES (480px)
+   ============================================ */
 
-  .lightbox-main {
-    flex-direction: row;
-    gap: 30px;
-    max-width: 90vw;
-    max-height: 90vh;
-  }
+@media (max-width: 480px) {
+    .lightbox {
+        padding: 10px;
+    }
 
-  .zoomist-container {
-    flex: 1.5;
-    border-radius: 8px;
-  }
+    .lightbox-content {
+        max-height: calc(100vh - 20px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        border-radius: 10px;
+    }
 
-  .lightbox-description-panel {
-    flex: 0 0 350px;
-    max-height: none;
-    display: flex;
-    flex-direction: column;
-    border-radius: 8px;
-    padding: 20px;
-  }
+    /* Image Container - Make it significantly taller */
+    .zoomist-container {
+        flex: 0 0 62%;
+        min-height: 240px;
+    }
 
-  .lightbox-description-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
+    /* Description Panel - Shorter to prioritize image */
+    .lightbox-description-panel {
+        flex: 0 0 38%;
+        padding: 15px;
+        border-radius: 0 0 10px 10px;
+    }
 
-  .lightbox-description-wrapper {
-    flex: 1;
-    overflow-y: auto;
-  }
+    .lightbox-description-content {
+        display: flex;
+        flex-direction: column;
+    }
 
-  .lightbox-title {
-    font-size: 1.75rem;
-    margin-bottom: 12px;
-  }
+    .lightbox-title {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
 
-  .lightbox-description {
-    font-size: 1rem;
-    line-height: 1.6;
-  }
+    .lightbox-description {
+        font-size: 12px;
+        line-height: 1.5;
+    }
 
-  .lightbox-close-btn {
-    top: 20px;
-    right: 20px;
-    width: 44px;
-    height: 44px;
-    background-color: rgba(255, 255, 255, 0.1);
-  }
+    .lightbox-close-btn {
+        top: 12px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
 
-  .lightbox-close-btn:hover {
-    background-color: rgba(239, 68, 68, 0.9);
-  }
+    .lightbox-loading-spinner {
+        width: 40px;
+        height: 40px;
+        border-width: 3px;
+    }
+
+    /* Adjust zoomist controls position on small devices */
+    .zoomist-zoomer {
+        bottom: auto;
+        top: 50px;
+        right: 12px;
+    }
 }
 
-@media (min-width: 1024px) {
-  .lightbox-content {
-    padding: 40px;
-  }
+/* ============================================
+   RESPONSIVE DESIGN - EXTRA SMALL (< 360px)
+   ============================================ */
 
-  .lightbox-main {
-    gap: 40px;
-  }
+@media (max-width: 360px) {
+    .lightbox {
+        padding: 5px;
+    }
 
-  .lightbox-description-panel {
-    flex: 0 0 400px;
-  }
+    .lightbox-content {
+        max-height: calc(100vh - 10px);
+        border-radius: 8px;
+    }
+
+    /* Image Container - Priority on smallest screens */
+    .zoomist-container {
+        flex: 0 0 60%;
+        min-height: 220px;
+    }
+
+    /* Description Panel - Compact on tiny screens */
+    .lightbox-description-panel {
+        flex: 0 0 40%;
+        padding: 12px;
+    }
+
+    .lightbox-title {
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+
+    .lightbox-description {
+        font-size: 11px;
+        line-height: 1.4;
+    }
+
+    .lightbox-close-btn {
+        top: 10px;
+        right: 10px;
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+    .lightbox-content {
+        height: 100vh;
+    }
+
+    .zoomist-container {
+        flex: 1;
+        border-radius: 12px 0 0 12px;
+    }
+
+    .lightbox-description-panel {
+        flex: 0 0 320px;
+        max-height: 100vh;
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: none;
+        border-radius: 0 12px 12px 0;
+        animation: slideInRight 0.4s ease-out;
+    }
+
+    /* Adjust zoomist controls in landscape mode */
+    .zoomist-zoomer {
+        bottom: 20px;
+        top: auto;
+        right: 15px;
+    }
+}
+
+/* ============================================
+   DARK MODE & ACCESSIBILITY
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .lightbox,
+    .lightbox-content,
+    .lightbox-image,
+    .lightbox-description-panel,
+    .lightbox-close-btn,
+    .lightbox-loading-spinner {
+        animation: none;
+        transition: none;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .lightbox-close-btn:focus-visible {
+        outline: 2px solid rgba(255, 255, 255, 0.5);
+        outline-offset: 2px;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: more) {
+    .lightbox {
+        background-color: rgba(0, 0, 0, 1);
+    }
+
+    .lightbox-content {
+        border: 2px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .lightbox-close-btn {
+        border-width: 3px;
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    .lightbox {
+        display: none !important;
+    }
 }
