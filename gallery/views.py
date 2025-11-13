@@ -16,14 +16,24 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from gallery.filters import PortfolioItemFilter
+from gallery.filters import PortfolioItemFilter, get_popular_tags
 from gallery.models import CompanyConfig, ContactQuery, PortfolioItem
 
 logger = logging.getLogger(__name__)
 
-HOMEPAGE_ITEMS_LIMIT = 6
 DEFAULT_PAGE_SIZE = 6
 TAGS_LIMIT = 20
+
+SERVICE_LABELS = {
+    'banners-stickers': 'Banners & Stickers',
+    'merchandise': 'Merchandise Branding',
+    'hospital-stationery': 'Books & Hospital Stationery',
+    'campaign-items': 'Campaign & Promotional Items',
+    'packaging': 'Packaging Solutions',
+    'brochures-flyers': 'Brochures & Flyers',
+    'other': 'Other',
+}
+
 
 def capitalise_first_letter(s):
     if not s:
@@ -41,13 +51,26 @@ def get_client_ip(request):
     return request.META.get('REMOTE_ADDR', '')
 
 
-def send_contact_email(name, email, message, service, config):
+def get_request_data(request):
+    """Extract data from POST or JSON body"""
+    if request.content_type and 'application/json' in request.content_type:
+        try:
+            return json.loads(request.body.decode('utf-8')) if request.body else {}
+        except json.JSONDecodeError:
+            pass
+    return request.POST.dict()
+
+
+def send_contact_email(name, email, phone, message, service, config):
+    service_label = SERVICE_LABELS.get(service, service or 'Other')
+    
     email_context = {
         'name': name,
         'email': email,
-        'phone': None,
+        'phone': phone,
         'message': message,
         'service': service,
+        'service_label': service_label,
         'config': config,
         'submitted_at': timezone.now(),
     }
@@ -68,15 +91,8 @@ def send_contact_email(name, email, message, service, config):
 
 @require_http_methods(["POST"])
 def contact_form_view(request):
-    try:
-        if request.content_type and 'application/json' in request.content_type:
-            data = json.loads(request.body.decode(
-                'utf-8')) if request.body else {}
-        else:
-            data = request.POST.dict()
-    except json.JSONDecodeError:
-        data = request.POST.dict()
-
+    data = get_request_data(request)
+    
     name = (data.get('name') or '').strip()
     email = (data.get('email') or '').strip()
     phone = (data.get('phone') or '').strip()
@@ -110,48 +126,7 @@ def contact_form_view(request):
                     user_agent=request.META.get('HTTP_USER_AGENT', ''),
                 )
 
-            # Include phone and service in email context by passing a small wrapper
-            # We'll render templates using the same send_contact_email helper but
-            # it expects phone in context; pass phone via monkeypatch in kwargs.
-            # Simpler: render templates here and send_mail directly so phone is included.
-            # Map known service slugs to human-friendly labels
-            SERVICE_LABELS = {
-                'banners-stickers': 'Banners & Stickers',
-                'merchandise': 'Merchandise Branding',
-                'hospital-stationery': 'Books & Hospital Stationery',
-                'campaign-items': 'Campaign & Promotional Items',
-                'packaging': 'Packaging Solutions',
-                'brochures-flyers': 'Brochures & Flyers',
-                'other': 'Other',
-            }
-
-            service_label = SERVICE_LABELS.get(service, service or 'Other')
-
-            email_context = {
-                'name': name,
-                'email': email,
-                'phone': phone,
-                'message': message,
-                'service': service,
-                'service_label': service_label,
-                'config': config,
-                'submitted_at': timezone.now(),
-            }
-
-            html_message = render_to_string(
-                'emails/contact_form.html', email_context)
-            plain_message = render_to_string(
-                'emails/contact_form.txt', email_context)
-            recipient_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
-
-            send_mail(
-                subject=f'New Inquiry from {name}',
-                message=plain_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[recipient_email],
-                html_message=html_message,
-                fail_silently=False,
-            )
+            send_contact_email(name, email, phone, message, service, config)
 
         return JsonResponse({
             'success': True,
@@ -173,13 +148,10 @@ def contact_form_view(request):
 
 
 def index(request):
-    """Single page application view that provides all data for the frontend"""
-    # Get all published portfolio items for the portfolio section
     portfolio_items = PortfolioItem.objects.filter(
         is_published=True
     ).prefetch_related('tags').order_by('-created_at')
 
-    # Get all tags for filtering (same as original gallery view)
     all_tags = PortfolioItem.tags.most_common()[:TAGS_LIMIT]
 
     context = {
@@ -202,6 +174,16 @@ def serialize_portfolio_item(item):
     }
 
 
+def parse_pagination_params(request):
+    try:
+        page = int(request.GET.get('page', 1))
+        per_page = int(request.GET.get('per_page', DEFAULT_PAGE_SIZE))
+    except (ValueError, TypeError):
+        page = 1
+        per_page = DEFAULT_PAGE_SIZE
+    return page, per_page
+
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def gallery_api(request):
@@ -211,23 +193,15 @@ def gallery_api(request):
         tags = [t.strip() for t in raw_tags_csv.split(',') if t.strip()
                 ] if raw_tags_csv else request.GET.getlist('tags[]')
 
-        try:
-            page = int(request.GET.get('page', 1))
-            per_page = int(request.GET.get('per_page', DEFAULT_PAGE_SIZE))
-        except (ValueError, TypeError):
-            page = 1
-            per_page = DEFAULT_PAGE_SIZE
+        page, per_page = parse_pagination_params(request)
 
         filter_params = {'is_published': True}
-
         if search:
             filter_params['search'] = search
-
         if tags and 'all' not in tags:
             filter_params['tag_list'] = ','.join(tags)
 
-        filter_instance = PortfolioItemFilter(
-            data=filter_params, request=request)
+        filter_instance = PortfolioItemFilter(data=filter_params, request=request)
         queryset = filter_instance.qs.prefetch_related('tags')
 
         paginator = Paginator(queryset, per_page)
@@ -266,8 +240,6 @@ def gallery_api(request):
 @permission_classes([AllowAny])
 def gallery_tags_api(request):
     try:
-        from .filters import get_popular_tags
-
         popular_tags = get_popular_tags(limit=TAGS_LIMIT)
 
         tags_data = [
@@ -279,12 +251,10 @@ def gallery_tags_api(request):
             for tag in popular_tags
         ]
 
-        response_data = {
+        return Response({
             'success': True,
             'tags': tags_data
-        }
-
-        return Response(response_data, status=status.HTTP_200_OK)
+        }, status=status.HTTP_200_OK)
 
     except Exception as e:
         logger.error(f"Error in gallery tags API: {e}")
