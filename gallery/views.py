@@ -159,6 +159,15 @@ def contact_form_view(request: HttpRequest) -> JsonResponse:
             status=500,
         )
 
+    if not config.is_email_configured():
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Email service is currently unavailable. Please try again later or contact us directly.",
+            },
+            status=503,
+        )
+
     try:
         with transaction.atomic():
             if config.always_save_contactus_queries:
