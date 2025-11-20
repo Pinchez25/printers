@@ -1,8 +1,9 @@
 from django import forms
 from taggit.forms import TagWidget
 from unfold.widgets import UnfoldAdminTextInputWidget
+from unfold.fields import INPUT_CLASSES
 
-from .models import PortfolioItem
+from .models import CompanyConfig, PortfolioItem
 
 class UnfoldTagWidget(TagWidget):
     """Custom tag widget that copies unfold's TextInput styling"""
@@ -28,3 +29,17 @@ class PortfolioItemForm(forms.ModelForm):
         widgets = {
             'tags': UnfoldTagWidget(),
         }
+
+class CompanyConfigAdminForm(forms.ModelForm):
+    class Meta:
+        model = CompanyConfig
+        fields = '__all__'
+        widgets = {
+            'email_password': forms.PasswordInput(render_value=True),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email_password'].widget.attrs.update({
+            'class': ' '.join(INPUT_CLASSES),
+        })

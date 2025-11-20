@@ -1,12 +1,98 @@
 import logging
+from functools import lru_cache
 from typing import Callable, Dict, Iterable, Optional
 
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import transaction
+from cryptography.fernet import Fernet, InvalidToken
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.db import models, transaction
 from django.db.models import FileField, ImageField, Model
 from django.db.models.signals import post_delete, post_save
 
 logger = logging.getLogger(__name__)
+
+
+@lru_cache(maxsize=8)
+def _get_cipher_for_key(key: str) -> Fernet:
+    return Fernet(key.encode())
+
+
+class EncryptedCharField(models.CharField):
+    PREFIX = 'fernet:'
+
+    def __init__(self, *args, encryption_key: Optional[str] = None, **kwargs):
+        self.encryption_key = encryption_key
+        super().__init__(*args, **kwargs)
+
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        if self.encryption_key is not None:
+            kwargs['encryption_key'] = self.encryption_key
+        return name, path, args, kwargs
+
+    def contribute_to_class(self, cls, name, **kwargs):
+        super().contribute_to_class(cls, name, **kwargs)
+        if self.max_length and self.max_length < 255:
+            import warnings
+            warnings.warn(
+                f"EncryptedCharField '{name}' on {cls.__name__} has max_length={self.max_length}, "
+                f"which may be too small for encrypted data. Recommend ≥255.",
+                UserWarning,
+                stacklevel=2
+            )
+
+    def get_internal_type(self):
+        return "CharField"
+
+    def get_encryption_key(self) -> str:
+        if self.encryption_key:
+            key = self.encryption_key
+        else:
+            key = getattr(settings, "ENCRYPTION_KEY", None)
+            if not key:
+                raise ValueError("ENCRYPTION_KEY not found in settings.")
+
+        try:
+            Fernet(key.encode())
+        except ValueError as e:
+            raise ValueError(f"Invalid ENCRYPTION_KEY: {e}") from e
+
+        return key
+
+    def _get_cipher(self) -> Fernet:
+        return _get_cipher_for_key(self.get_encryption_key())
+
+    def from_db_value(self, value, expression, connection):
+        return self.to_python(value)
+
+    def to_python(self, value):
+        if value is None or value == '':
+            return value
+
+        if not self._is_encrypted(value):
+            return value
+
+        encrypted_data = value[len(self.PREFIX):]
+        try:
+            return self._get_cipher().decrypt(encrypted_data.encode()).decode()
+        except InvalidToken:
+            raise ValidationError("Failed to decrypt value. Key mismatch or corrupted data.")
+
+    def _is_encrypted(self, value: str) -> bool:
+        return isinstance(value, str) and value.startswith(self.PREFIX)
+
+    def get_prep_value(self, value):
+        if value is None or value == '':
+            return value
+
+        if self._is_encrypted(value):
+            return value
+
+        try:
+            encrypted = self._get_cipher().encrypt(value.encode()).decode()
+            return f"{self.PREFIX}{encrypted}"
+        except Exception as e:
+            raise ValueError(f"Failed to encrypt value: {e}")
 
 
 class AutoCleanFileField(FileField):

@@ -216,6 +216,7 @@ CACHES = {
     },
 }
 
+ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
 
 BACKBLAZE_CONFIG = {
     "application_key_id": os.getenv("BACKBLAZE_KEY_ID"),

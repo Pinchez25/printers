@@ -9,7 +9,7 @@ from unfold.admin import ModelAdmin, TabularInline
 from unfold.decorators import action, display
 from unfold.enums import ActionVariant
 
-from .forms import PortfolioItemForm
+from .forms import CompanyConfigAdminForm, PortfolioItemForm
 from .models import CompanyConfig, ContactQuery, PortfolioItem
 
 
@@ -88,6 +88,7 @@ class PortfolioItemAdmin(ModelAdmin):
 class CompanyConfigAdmin(ModelAdmin):
     compressed_fields = True
     warn_unsaved_form = True
+    form = CompanyConfigAdminForm
 
     exclude = ('singleton_enforcer',)
 
@@ -99,6 +100,19 @@ class CompanyConfigAdmin(ModelAdmin):
         ("Social Media", {
             "fields": ("facebook_username", "twitter_username", "instagram_username", "tiktok"),
             "classes": ["tab"],
+        }),
+        ("Email Configuration", {
+            "fields": (
+                "email_host", 
+                "email_port", 
+                "email_use_tls",
+                "email_username", 
+                "email_password",
+                "email_from_address", 
+                "email_to_address"
+            ),
+            "classes": ["tab"],
+            "description": "Configure SMTP settings for sending contact form emails. Leave 'From' address blank to use email username. Leave 'To' address blank to send to email username.",
         })
     )
 
