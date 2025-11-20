@@ -9,7 +9,7 @@ from unfold.admin import ModelAdmin, TabularInline
 from unfold.decorators import action, display
 from unfold.enums import ActionVariant
 
-from .forms import PortfolioItemForm
+from .forms import CompanyConfigAdminForm, PortfolioItemForm
 from .models import CompanyConfig, ContactQuery, PortfolioItem
 
 
@@ -88,6 +88,7 @@ class PortfolioItemAdmin(ModelAdmin):
 class CompanyConfigAdmin(ModelAdmin):
     compressed_fields = True
     warn_unsaved_form = True
+    form = CompanyConfigAdminForm
 
     exclude = ('singleton_enforcer',)
 
