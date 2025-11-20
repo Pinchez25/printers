@@ -4,13 +4,13 @@ from pathlib import Path
 from autoslug import AutoSlugField
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
 # from django_backblaze_b2 import BackblazeB2Storage
 from taggit.managers import TaggableManager
-from django.templatetags.static import static
 
-from gallery.fields import AutoCleanImageField
+from gallery.fields import AutoCleanImageField, EncryptedCharField
 from gallery.storage_backends import SupabaseStorage
 
 
@@ -64,7 +64,6 @@ class PortfolioItem(models.Model):
             # Any error (missing file, storage error, etc.) falls back to default
             return static("default.jpg")
 
-
     def __str__(self) -> str:
         return self.title
 
@@ -86,22 +85,22 @@ class CompanyConfig(models.Model):
         max_length=100, blank=True, help_text="TikTok username")
     always_save_contactus_queries = models.BooleanField(default=False,
                                                         help_text="Always save contact form submissions to database")
-    
+
     email_host = models.CharField(
         max_length=255, default="smtp.gmail.com", blank=True, help_text="SMTP host (e.g., smtp.gmail.com)")
     email_port = models.PositiveIntegerField(
         default=587, help_text="SMTP port (typically 587 for TLS or 465 for SSL)")
     email_username = models.EmailField(
         blank=True, help_text="Email account username/address for sending emails")
-    email_password = models.CharField(
-        max_length=255, blank=True, help_text="Email account password or app-specific password. Spaces are preserved (e.g., 'slim bruw vyeo wnce')")
+    email_password = EncryptedCharField(
+        max_length=255, blank=True,
+        help_text="Email account password or app-specific password. Spaces are preserved (e.g., 'slim bruw vyeo wnce')")
     email_use_tls = models.BooleanField(
         default=True, help_text="Use TLS encryption (uncheck for SSL)")
     email_from_address = models.EmailField(
         blank=True, help_text="'From' email address. If empty, uses email username")
     email_to_address = models.EmailField(
         blank=True, help_text="Email address to receive contact form submissions. If empty, sends to email username")
-
 
     class Meta:
         verbose_name = "Company Configuration"
