@@ -99,6 +99,19 @@ class CompanyConfigAdmin(ModelAdmin):
         ("Social Media", {
             "fields": ("facebook_username", "twitter_username", "instagram_username", "tiktok"),
             "classes": ["tab"],
+        }),
+        ("Email Configuration", {
+            "fields": (
+                "email_host", 
+                "email_port", 
+                "email_use_tls",
+                "email_username", 
+                "email_password",
+                "email_from_address", 
+                "email_to_address"
+            ),
+            "classes": ["tab"],
+            "description": "Configure SMTP settings for sending contact form emails. Leave 'From' address blank to use email username. Leave 'To' address blank to send to email username.",
         })
     )
 
