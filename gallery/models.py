@@ -120,6 +120,10 @@ class CompanyConfig(models.Model):
         obj, created = cls.objects.get_or_create(singleton_enforcer=True)
         return obj
 
+    def is_email_configured(self) -> bool:
+        """Check if email configuration is properly set up."""
+        return bool(self.email_host and self.email_username and self.email_password)
+
     def __str__(self):
         return "Company Configuration"
 
