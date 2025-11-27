@@ -1,35 +1,63 @@
 /* Image Loading States */
 
 /* Skeleton loader for portfolio images */
-.portfolio-image-wrapper {
+.portfolio-image-wrapper.loading {
   position: relative;
   background: linear-gradient(
-    90deg,
-    rgba(30, 41, 59, 0.5) 0%,
-    rgba(51, 65, 85, 0.5) 50%,
-    rgba(30, 41, 59, 0.5) 100%
+    135deg,
+    rgba(30, 41, 59, 0.6) 0%,
+    rgba(51, 65, 85, 0.6) 25%,
+    rgba(99, 102, 241, 0.15) 50%,
+    rgba(51, 65, 85, 0.6) 75%,
+    rgba(30, 41, 59, 0.6) 100%
   );
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s ease-in-out infinite;
+  background-size: 200% 200%;
+  animation: skeleton-loading 2s ease-in-out infinite;
+  overflow: hidden;
+}
+
+.portfolio-image-wrapper.loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 @keyframes skeleton-loading {
   0% {
-    background-position: 200% 0;
+    background-position: 200% 200%;
   }
   100% {
-    background-position: -200% 0;
+    background-position: -200% -200%;
   }
 }
 
 /* Hide image until loaded */
 .portfolio-image {
   opacity: 0;
-  transition: opacity 0.4s ease-in-out;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(0.95);
 }
 
 .portfolio-image.loaded {
   opacity: 1;
+  transform: scale(1);
 }
 
 /* Lightbox image loading state */
