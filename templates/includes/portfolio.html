@@ -61,11 +61,15 @@
                     <div class="portfolio-overlay" aria-hidden="true">
                         <div class="portfolio-overlay-icon" aria-hidden="true">
                             <!-- opposing arrows to indicate 'open' / maximise -->
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M3 9V3h6M21 15v6h-6M21 3l-7 7M3 21l7-7" />
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
                             </svg>
                         </div>
-                        <h3 class="portfolio-overlay-title" aria-hidden="true"></h3>
+                        <div class="portfolio-overlay-content" aria-hidden="true">
+                            <h3 class="portfolio-overlay-title" aria-hidden="true"></h3>
+                            <div class="portfolio-overlay-tags" aria-hidden="true"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -115,9 +119,6 @@
                     <path d="M12 5v14M5 12l7 7 7-7"></path>
                 </svg>
             </button>
-            <p class="portfolio-more-text">
-                Discover more of our creative projects and graphic design solutions
-            </p>
         </div>
     </div>
 </section>
