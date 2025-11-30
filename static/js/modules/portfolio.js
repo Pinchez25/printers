@@ -53,6 +53,7 @@ function cachePortfolioElements() {
     searchInput: document.getElementById("portfolio-search"),
     searchClear: document.getElementById("search-clear"),
     clearFiltersBtn: document.getElementById("clear-search-filters"),
+    seeMoreContainer: document.querySelector(".portfolio-see-more"),
     seeMoreBtn: document.getElementById("see-more-portfolio"),
     seeMoreText: document.getElementById("see-more-text"),
     seeMoreLoading: document.getElementById("see-more-loading"),
@@ -226,7 +227,7 @@ async function loadPortfolioItems(elements, state, page = 1, append = false) {
 
       renderPortfolioItems(elements, data.items, append);
 
-      toggle(elements.seeMoreBtn, state.hasMorePages, "inline-flex");
+      toggle(elements.seeMoreContainer, state.hasMorePages, "block");
     } else {
       throw new Error(data.message || "Failed to fetch portfolio data");
     }
@@ -327,7 +328,7 @@ function showNoResults(elements) {
   hide(elements.controls);
   hide(elements.filters);
   show(elements.noResults, "flex");
-  hide(elements.seeMoreBtn);
+  hide(elements.seeMoreContainer);
 }
 
 function hideNoResults(elements) {
