@@ -44,4 +44,5 @@ jobs:
           DB_PASSWORD: root
           DB_HOST: 127.0.0.1
           DB_PORT: 3306
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
         run: python manage.py test
