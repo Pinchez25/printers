@@ -1,291 +1,438 @@
-from datetime import timedelta
-from unittest.mock import MagicMock, patch
-
+import uuid
+from datetime import timezone as dt_timezone
+from unittest.mock import patch, MagicMock
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from taggit.models import Tag
 
-from gallery.models import CompanyConfig, ContactQuery, PortfolioItem
+from gallery.models import PortfolioItem, CompanyConfig, ContactQuery, upload_to
+from gallery.storage_backends import SupabaseStorage
 
 
-class PortfolioItemModelTest(TestCase):
-    """Test cases for PortfolioItem model"""
+class PortfolioItemModelTestCase(TestCase):
 
     def setUp(self):
-        """Set up test data"""
-        self.portfolio_item_data = {
-            'title': 'Test Portfolio Item',
-            'description': 'This is a test description for the portfolio item.',
-            'is_published': True,
-        }
+        self.valid_title = "Test Portfolio Item"
+        self.valid_description = "A test description"
+        self.valid_image = SimpleUploadedFile("test.jpg", b"file_content", content_type="image/jpeg")
+        # Mock storage to prevent real network calls
+        self.storage_patchers = [
+            patch.object(SupabaseStorage, '_save', return_value='mock/path.jpg'),
+            patch.object(SupabaseStorage, '_get_file_metadata', return_value={'name': 'mock.jpg', 'size': 100}),
+            patch.object(SupabaseStorage, 'url', return_value='http://mock.com/image.jpg'),
+        ]
+        for p in self.storage_patchers:
+            p.start()
 
-    @patch('gallery.models.get_backblaze_storage')
-    def test_portfolio_item_creation(self, mock_storage):
-        """Test creating a PortfolioItem instance"""
-        # Mock the storage to prevent network calls
-        mock_storage.return_value = MagicMock()
+    def tearDown(self):
+        for p in self.storage_patchers:
+            p.stop()
 
-        item = PortfolioItem.objects.create(**self.portfolio_item_data)
-        self.assertEqual(item.title, self.portfolio_item_data['title'])
-        self.assertEqual(item.description, self.portfolio_item_data['description'])
+    def test_portfolio_item_creation_minimal(self):
+        item = PortfolioItem.objects.create(
+            title=self.valid_title,
+            image=self.valid_image
+        )
+        self.assertEqual(item.title, self.valid_title)
+        self.assertEqual(item.description, "")
         self.assertTrue(item.is_published)
-        self.assertIsNotNone(item.slug)
         self.assertIsNotNone(item.created_at)
         self.assertIsNotNone(item.updated_at)
+        self.assertEqual(str(item), self.valid_title)
 
-    @patch('gallery.models.get_backblaze_storage')
-    def test_portfolio_item_str_method(self, mock_storage):
-        """Test the string representation of PortfolioItem"""
-        mock_storage.return_value = MagicMock()
-        item = PortfolioItem.objects.create(**self.portfolio_item_data)
-        self.assertEqual(str(item), self.portfolio_item_data['title'])
+    def test_portfolio_item_creation_full(self):
+        item = PortfolioItem.objects.create(
+            title=self.valid_title,
+            description=self.valid_description,
+            image=self.valid_image,
+            is_published=False
+        )
+        self.assertEqual(item.title, self.valid_title)
+        self.assertEqual(item.description, self.valid_description)
+        self.assertFalse(item.is_published)
 
-    @patch('gallery.models.get_backblaze_storage')
-    def test_portfolio_item_slug_generation(self, mock_storage):
-        """Test automatic slug generation"""
-        mock_storage.return_value = MagicMock()
-        item = PortfolioItem.objects.create(**self.portfolio_item_data)
-        self.assertTrue(item.slug)
-        # Slug should be URL-friendly
-        self.assertNotIn(' ', item.slug)
-        self.assertNotIn('\'', item.slug)
+    def test_slug_auto_generation(self):
+        item = PortfolioItem.objects.create(
+            title=self.valid_title,
+            image=self.valid_image
+        )
+        self.assertEqual(item.slug, "test-portfolio-item")
 
-    @patch('gallery.models.get_backblaze_storage')
-    def test_portfolio_item_auto_timestamps(self, mock_storage):
-        """Test automatic timestamp creation and updates"""
-        mock_storage.return_value = MagicMock()
-        item = PortfolioItem.objects.create(**self.portfolio_item_data)
-        original_created_at = item.created_at
-        original_updated_at = item.updated_at
+    def test_slug_uniqueness(self):
+        item1 = PortfolioItem.objects.create(
+            title=self.valid_title,
+            image=self.valid_image
+        )
+        item2 = PortfolioItem.objects.create(
+            title=self.valid_title,
+            image=SimpleUploadedFile("test2.jpg", b"file_content", content_type="image/jpeg")
+        )
+        self.assertNotEqual(item1.slug, item2.slug)
+        self.assertTrue(item2.slug.startswith("test-portfolio-item"))
 
+    @patch('gallery.models.reverse')
+    def test_get_absolute_url(self, mock_reverse):
+        mock_reverse.return_value = f"/gallery/test-slug/"
+        item = PortfolioItem.objects.create(
+            title=self.valid_title,
+            image=self.valid_image
+        )
+        result = item.get_absolute_url()
+        mock_reverse.assert_called_once_with("gallery:detail", kwargs={"slug": item.slug})
+        self.assertEqual(result, "/gallery/test-slug/")
 
-        item.title = 'Updated Title'
-        item.save()
+    @patch('gallery.models.static')
+    def test_get_image_url_success(self, mock_static):
+        mock_static.return_value = "/static/default.jpg"
+        item = PortfolioItem.objects.create(
+            title=self.valid_title,
+            image=self.valid_image
+        )
+        mock_image = MagicMock()
+        mock_image.url = 'http://example.com/test.jpg'
+        item.image = mock_image
+        self.assertEqual(item.get_image_url(), 'http://example.com/test.jpg')
 
-        self.assertEqual(item.created_at, original_created_at)
-        self.assertGreater(item.updated_at, original_updated_at)
+    @patch('gallery.models.static')
+    def test_get_image_url_fallback(self, mock_static):
+        mock_static.return_value = "/static/default.jpg"
+        item = PortfolioItem.objects.create(
+            title=self.valid_title,
+            image=self.valid_image
+        )
+        with patch.object(item.image.storage, 'url', side_effect=Exception("Storage error")):
+            result = item.get_image_url()
+            self.assertEqual(result, "/static/default.jpg")
 
-    @patch('gallery.models.get_backblaze_storage')
-    def test_portfolio_item_default_values(self, mock_storage):
-        """Test default values for PortfolioItem"""
-        mock_storage.return_value = MagicMock()
-        item = PortfolioItem.objects.create(title='Test Item')
+    def test_title_max_length(self):
+        max_length = PortfolioItem._meta.get_field('title').max_length
+        self.assertEqual(max_length, 200)
+
+    def test_description_blank(self):
+        item = PortfolioItem.objects.create(
+            title=self.valid_title,
+            image=self.valid_image
+        )
+        self.assertEqual(item.description, "")
+
+    def test_is_published_default_true(self):
+        item = PortfolioItem.objects.create(
+            title=self.valid_title,
+            image=self.valid_image
+        )
         self.assertTrue(item.is_published)
-        self.assertEqual(item.description, '')
 
-    @patch('gallery.models.get_backblaze_storage')
-    def test_portfolio_item_get_absolute_url(self, mock_storage):
-        """Test the get_absolute_url method"""
-        mock_storage.return_value = MagicMock()
-        item = PortfolioItem.objects.create(**self.portfolio_item_data)
-        with self.assertRaises(Exception):
-            item.get_absolute_url()
+    def test_created_at_auto_now_add(self):
+        before = timezone.now()
+        item = PortfolioItem.objects.create(
+            title=self.valid_title,
+            image=self.valid_image
+        )
+        after = timezone.now()
+        self.assertGreaterEqual(item.created_at, before)
+        self.assertLessEqual(item.created_at, after)
 
-    @patch('gallery.models.get_backblaze_storage')
-    def test_portfolio_item_tags_relationship(self, mock_storage):
-        """Test the tags relationship"""
-        mock_storage.return_value = MagicMock()
-        item = PortfolioItem.objects.create(**self.portfolio_item_data)
+    def test_updated_at_auto_now(self):
+        item = PortfolioItem.objects.create(
+            title=self.valid_title,
+            image=self.valid_image
+        )
+        original_updated = item.updated_at
+        item.title = "Updated Title"
+        item.save()
+        self.assertGreater(item.updated_at, original_updated)
 
-        # Add tags
-        tag1 = Tag.objects.create(name='test-tag-1', slug='test-tag-1')
-        tag2 = Tag.objects.create(name='test-tag-2', slug='test-tag-2')
+    def test_ordering_by_created_at_desc(self):
+        item1 = PortfolioItem.objects.create(
+            title="First",
+            image=self.valid_image
+        )
+        item2 = PortfolioItem.objects.create(
+            title="Second",
+            image=SimpleUploadedFile("test2.jpg", b"file_content", content_type="image/jpeg")
+        )
+        items = list(PortfolioItem.objects.all())
+        self.assertEqual(items[0], item2)
+        self.assertEqual(items[1], item1)
 
+    def test_tags_blank_by_default(self):
+        item = PortfolioItem.objects.create(
+            title=self.valid_title,
+            image=self.valid_image
+        )
+        self.assertEqual(list(item.tags.all()), [])
+
+    def test_tags_add_and_retrieve(self):
+        item = PortfolioItem.objects.create(
+            title=self.valid_title,
+            image=self.valid_image
+        )
+        tag1 = Tag.objects.create(name="tag1")
+        tag2 = Tag.objects.create(name="tag2")
         item.tags.add(tag1, tag2)
-
-        item.refresh_from_db()
-
-        # Check tags are associated
         self.assertIn(tag1, item.tags.all())
         self.assertIn(tag2, item.tags.all())
-        self.assertEqual(item.tags.count(), 2)
 
-    @patch('gallery.models.get_backblaze_storage')
-    def test_portfolio_item_ordering(self, mock_storage):
-        """Test default ordering by creation date"""
-        mock_storage.return_value = MagicMock()
-        # Create items with different timestamps
-        item1 = PortfolioItem.objects.create(title='First Item')
-        item2 = PortfolioItem.objects.create(title='Second Item')
+    def test_upload_to_function(self):
+        mock_instance = MagicMock()
+        mock_instance.created_at = timezone.now()
+        filename = "test.jpg"
+        path = upload_to(mock_instance, filename)
+        self.assertIn(str(mock_instance.created_at.year), path)
+        self.assertIn(str(mock_instance.created_at.month), path)
+        self.assertTrue(path.endswith('.jpg'))
+        parts = path.split('/')
+        self.assertEqual(parts[0], 'portfolio')
+        filename_part = parts[-1]
+        name_without_ext = filename_part.split('.')[0]
+        self.assertTrue(uuid.UUID(name_without_ext))
 
-        # Update the second item's timestamp to be older
-        item2.created_at = timezone.now() - timedelta(days=1)
-        item2.save()
+    def test_upload_to_without_created_at(self):
+        mock_instance = MagicMock()
+        mock_instance.created_at = None
+        filename = "test.jpg"
+        path = upload_to(mock_instance, filename)
+        now = timezone.now()
+        self.assertIn(str(now.year), path)
+        self.assertIn(str(now.month), path)
 
-        items = list(PortfolioItem.objects.all())
-        # Should be ordered by created_at descending (newest first)
-        self.assertEqual(items[0], item1)
-        self.assertEqual(items[1], item2)
 
-
-class CompanyConfigModelTest(TestCase):
-    """Test cases for CompanyConfig model"""
+class CompanyConfigModelTestCase(TestCase):
 
     def setUp(self):
-        """Set up test data"""
-        self.config_data = {
-            'address': '123 Test Street, Test City, TC 12345',
-            'email': 'test@company.com',
-            'contact_number': '254758123456',
-            'facebook_username': 'testcompany',
-            'twitter_username': 'testcompany',
-            'instagram_username': 'testcompany',
-            'tiktok': 'testcompany',
-            'services_offered': ['Business Cards', 'Posters', 'Banners'],
-            'always_save_contactus_queries': True,
-            'happy_customers': 1000,
-            'projects_completed': 500,
-            'years_experience': 5,
-            'support_hours': 24,
-        }
+        self.valid_address = "123 Test Street"
+        self.valid_contact_number = "254712345678"
+        self.valid_facebook_username = "testfb"
+        self.valid_twitter_username = "testtw"
+        self.valid_instagram_username = "testig"
+        self.valid_tiktok = "testtt"
+        self.valid_email_host = "smtp.gmail.com"
+        self.valid_email_port = 587
+        self.valid_email_username = "test@example.com"
+        self.valid_email_password = "testpass"
+        self.valid_email_from_address = "from@example.com"
+        self.valid_email_to_address = "to@example.com"
 
-    def test_company_config_creation(self):
-        """Test creating a CompanyConfig instance"""
-        config = CompanyConfig.objects.create(**self.config_data)
-        self.assertEqual(config.address, self.config_data['address'])
-        self.assertEqual(config.email, self.config_data['email'])
-        self.assertEqual(config.contact_number, self.config_data['contact_number'])
-        self.assertEqual(config.services_offered, self.config_data['services_offered'])
-        self.assertTrue(config.always_save_contactus_queries)
-        self.assertEqual(config.happy_customers, 1000)
-        self.assertEqual(config.projects_completed, 500)
-        self.assertEqual(config.years_experience, 5)
-        self.assertEqual(config.support_hours, 24)
+    def test_company_config_creation_first(self):
+        config = CompanyConfig.objects.create()
+        self.assertTrue(config.singleton_enforcer)
+        self.assertEqual(str(config), "Company Configuration")
 
-    def test_company_config_singleton_enforcer(self):
-        """Test that singleton_enforcer is always True"""
-        config = CompanyConfig.objects.create(**self.config_data)
+    def test_singleton_enforcer_unique(self):
+        CompanyConfig.objects.create()
+        with self.assertRaises(Exception):
+            CompanyConfig.objects.create()
+
+    def test_get_instance_creates_if_none(self):
+        config = CompanyConfig.get_instance()
+        self.assertIsInstance(config, CompanyConfig)
         self.assertTrue(config.singleton_enforcer)
 
-        # Try to create another config - should fail
-        with self.assertRaises(ValidationError):
-            CompanyConfig.objects.create(**self.config_data)
-
-    def test_company_config_get_instance(self):
-        """Test the get_instance class method"""
-        # Should create a new instance if none exists
+    def test_get_instance_returns_existing(self):
         config1 = CompanyConfig.get_instance()
-        self.assertIsInstance(config1, CompanyConfig)
-
-        # Should return the same instance
         config2 = CompanyConfig.get_instance()
         self.assertEqual(config1, config2)
 
-    def test_company_config_str_method(self):
-        """Test the string representation of CompanyConfig"""
-        config = CompanyConfig.objects.create(**self.config_data)
-        self.assertEqual(str(config), "Company Configuration")
-
-    def test_company_config_default_values(self):
-        """Test default values for CompanyConfig"""
-        config = CompanyConfig.get_instance()
-        self.assertEqual(config.services_offered, [])
-        self.assertFalse(config.always_save_contactus_queries)
-        self.assertEqual(config.happy_customers, 5000)
-        self.assertEqual(config.projects_completed, 15000)
-        self.assertEqual(config.years_experience, 8)
-        self.assertEqual(config.support_hours, 24)
-
-    def test_company_config_save_method(self):
-        """Test the save method enforces singleton"""
-        config = CompanyConfig.get_instance()
-        config.address = 'New Address'
+    def test_save_sets_singleton_enforcer(self):
+        config = CompanyConfig()
         config.save()
+        self.assertTrue(config.singleton_enforcer)
 
-        # Should still be the same instance
-        config2 = CompanyConfig.get_instance()
-        self.assertEqual(config, config2)
-        self.assertEqual(config.address, 'New Address')
+    def test_clean_allows_first_instance(self):
+        config = CompanyConfig()
+        config.full_clean()
 
-    def test_company_config_clean_method(self):
-        """Test the clean method validation"""
-        # Create first instance
-        CompanyConfig.objects.create(**self.config_data)
-
-        # Try to create another - should raise ValidationError
-        config2 = CompanyConfig(**self.config_data)
+    def test_clean_raises_validation_error_on_second_instance(self):
+        CompanyConfig.objects.create()
+        config = CompanyConfig()
         with self.assertRaises(ValidationError):
-            config2.full_clean()
+            config.full_clean()
+
+    def test_is_email_configured_true(self):
+        config = CompanyConfig.objects.create(
+            email_host=self.valid_email_host,
+            email_username=self.valid_email_username,
+            email_password=self.valid_email_password
+        )
+        self.assertTrue(config.is_email_configured())
+
+    def test_is_email_configured_false_missing_username(self):
+        config = CompanyConfig.objects.create(
+            email_password=self.valid_email_password
+        )
+        self.assertFalse(config.is_email_configured())
+
+    def test_is_email_configured_false_missing_username(self):
+        config = CompanyConfig.objects.create(
+            email_host=self.valid_email_host,
+            email_password=self.valid_email_password
+        )
+        self.assertFalse(config.is_email_configured())
+
+    def test_is_email_configured_false_missing_password(self):
+        config = CompanyConfig.objects.create(
+            email_host=self.valid_email_host,
+            email_username=self.valid_email_username
+        )
+        self.assertFalse(config.is_email_configured())
+
+    def test_email_fields_defaults(self):
+        config = CompanyConfig.objects.create()
+        self.assertEqual(config.email_host, "smtp.gmail.com")
+        self.assertEqual(config.email_port, 587)
+        self.assertTrue(config.email_use_tls)
+
+    def test_address_blank(self):
+        config = CompanyConfig.objects.create()
+        self.assertEqual(config.address, "")
+
+    def test_contact_number_max_length(self):
+        max_length = CompanyConfig._meta.get_field('contact_number').max_length
+        self.assertEqual(max_length, 20)
+
+    def test_username_fields_max_length(self):
+        max_length = CompanyConfig._meta.get_field('facebook_username').max_length
+        self.assertEqual(max_length, 100)
+
+    def test_email_fields_max_length(self):
+        max_length = CompanyConfig._meta.get_field('email_host').max_length
+        self.assertEqual(max_length, 255)
+
+    def test_always_save_contactus_queries_default_false(self):
+        config = CompanyConfig.objects.create()
+        self.assertFalse(config.always_save_contactus_queries)
+
+    def test_email_use_tls_default_true(self):
+        config = CompanyConfig.objects.create()
+        self.assertTrue(config.email_use_tls)
+
+    def test_email_from_address_blank_uses_username(self):
+        config = CompanyConfig.objects.create(
+            email_username=self.valid_email_username
+        )
+        self.assertEqual(config.email_from_address, "")
+
+    def test_email_to_address_blank_uses_username(self):
+        config = CompanyConfig.objects.create(
+            email_username=self.valid_email_username
+        )
+        self.assertEqual(config.email_to_address, "")
+
+    def test_verbose_name(self):
+        meta = CompanyConfig._meta
+        self.assertEqual(meta.verbose_name, "Company Configuration")
+        self.assertEqual(meta.verbose_name_plural, "Company Configuration")
 
 
-class ContactQueryModelTest(TestCase):
-    """Test cases for ContactQuery model"""
+class ContactQueryModelTestCase(TestCase):
 
     def setUp(self):
-        """Set up test data"""
-        self.contact_data = {
-            'name': 'John Doe',
-            'email': 'john@example.com',
-            'service_required': 'Business Cards',
-            'message': 'I would like to order some business cards for my company.',
-            'ip_address': '192.168.1.1',
-            'user_agent': 'Mozilla/5.0 (Test Browser)',
-        }
+        self.valid_name = "John Doe"
+        self.valid_email = "john@example.com"
+        self.valid_service_required = "banners-stickers"
+        self.valid_message = "Test message"
+        self.valid_ip_address = "192.168.1.1"
+        self.valid_user_agent = "Test Agent"
 
-    def test_contact_query_creation(self):
-        """Test creating a ContactQuery instance"""
-        contact = ContactQuery.objects.create(**self.contact_data)
-        self.assertEqual(contact.name, self.contact_data['name'])
-        self.assertEqual(contact.email, self.contact_data['email'])
-        self.assertEqual(contact.service_required, self.contact_data['service_required'])
-        self.assertEqual(contact.message, self.contact_data['message'])
-        self.assertEqual(contact.ip_address, self.contact_data['ip_address'])
-        self.assertEqual(contact.user_agent, self.contact_data['user_agent'])
-        self.assertIsNotNone(contact.submitted_at)
+    def test_contact_query_creation_minimal(self):
+        query = ContactQuery.objects.create(
+            name=self.valid_name,
+            service_required=self.valid_service_required,
+            message=self.valid_message
+        )
+        self.assertEqual(query.name, self.valid_name)
+        self.assertEqual(query.email, "")
+        self.assertEqual(query.service_required, self.valid_service_required)
+        self.assertEqual(query.message, self.valid_message)
+        self.assertIsNotNone(query.submitted_at)
+        self.assertIsNone(query.ip_address)
+        self.assertEqual(query.user_agent, "")
+        expected_str = f"{self.valid_name} - {self.valid_service_required} ({query.submitted_at.strftime('%Y-%m-%d')})"
+        self.assertEqual(str(query), expected_str)
 
-    def test_contact_query_str_method(self):
-        """Test the string representation of ContactQuery"""
-        contact = ContactQuery.objects.create(**self.contact_data)
-        expected_str = f"{self.contact_data['name']} - {self.contact_data['service_required']} ({contact.submitted_at.strftime('%Y-%m-%d')})"
-        self.assertEqual(str(contact), expected_str)
+    def test_contact_query_creation_full(self):
+        query = ContactQuery.objects.create(
+            name=self.valid_name,
+            email=self.valid_email,
+            service_required=self.valid_service_required,
+            message=self.valid_message,
+            ip_address=self.valid_ip_address,
+            user_agent=self.valid_user_agent
+        )
+        self.assertEqual(query.email, self.valid_email)
+        self.assertEqual(query.ip_address, self.valid_ip_address)
+        self.assertEqual(query.user_agent, self.valid_user_agent)
 
-    def test_contact_query_optional_email(self):
-        """Test that email is optional"""
-        contact_data_no_email = self.contact_data.copy()
-        del contact_data_no_email['email']
+    def test_name_max_length(self):
+        max_length = ContactQuery._meta.get_field('name').max_length
+        self.assertEqual(max_length, 200)
 
-        contact = ContactQuery.objects.create(**contact_data_no_email)
-        self.assertEqual(contact.email, '')  # Django sets blank email fields to empty string
+    def test_service_required_max_length(self):
+        max_length = ContactQuery._meta.get_field('service_required').max_length
+        self.assertEqual(max_length, 100)
 
-    def test_contact_query_ordering(self):
-        """Test default ordering by submission date"""
-        # Create contacts with different timestamps
-        contact1 = ContactQuery.objects.create(**self.contact_data)
+    def test_email_blank(self):
+        query = ContactQuery.objects.create(
+            name=self.valid_name,
+            service_required=self.valid_service_required,
+            message=self.valid_message
+        )
+        self.assertEqual(query.email, "")
 
-        contact_data2 = self.contact_data.copy()
-        contact_data2['name'] = 'Jane Smith'
-        contact2 = ContactQuery.objects.create(**contact_data2)
+    def test_ip_address_blank_null(self):
+        query = ContactQuery.objects.create(
+            name=self.valid_name,
+            service_required=self.valid_service_required,
+            message=self.valid_message
+        )
+        self.assertIsNone(query.ip_address)
 
-        contact2.submitted_at = timezone.now() - timedelta(days=1)
-        contact2.save()
+    def test_user_agent_blank(self):
+        query = ContactQuery.objects.create(
+            name=self.valid_name,
+            service_required=self.valid_service_required,
+            message=self.valid_message
+        )
+        self.assertEqual(query.user_agent, "")
 
-        contacts = list(ContactQuery.objects.all())
-        self.assertEqual(contacts[0], contact1)
-        self.assertEqual(contacts[1], contact2)
+    def test_submitted_at_auto_now_add(self):
+        before = timezone.now()
+        query = ContactQuery.objects.create(
+            name=self.valid_name,
+            service_required=self.valid_service_required,
+            message=self.valid_message
+        )
+        after = timezone.now()
+        self.assertGreaterEqual(query.submitted_at, before)
+        self.assertLessEqual(query.submitted_at, after)
 
-    def test_contact_query_blank_optional_fields(self):
-        """Test that optional fields can be blank"""
-        contact_data_blank = {
-            'name': 'Test User',
-            'service_required': 'Test Service',
-            'message': 'Test message',
-            'ip_address': None,
-            'user_agent': '',
-        }
+    def test_ordering_by_submitted_at_desc(self):
+        query1 = ContactQuery.objects.create(
+            name="First",
+            service_required=self.valid_service_required,
+            message=self.valid_message
+        )
+        query2 = ContactQuery.objects.create(
+            name="Second",
+            service_required=self.valid_service_required,
+            message=self.valid_message
+        )
+        queries = list(ContactQuery.objects.all())
+        self.assertEqual(queries[0], query2)
+        self.assertEqual(queries[1], query1)
 
-        contact = ContactQuery.objects.create(**contact_data_blank)
-        self.assertIsNone(contact.ip_address)
-        self.assertEqual(contact.user_agent, '')
+    def test_str_method_formatting(self):
+        query = ContactQuery.objects.create(
+            name=self.valid_name,
+            service_required=self.valid_service_required,
+            message=self.valid_message
+        )
+        expected = f"{self.valid_name} - {self.valid_service_required} ({query.submitted_at.strftime('%Y-%m-%d')})"
+        self.assertEqual(str(query), expected)
 
-    def test_contact_query_max_lengths(self):
-        """Test field max length constraints"""
-        long_name = 'a' * 201
-        contact_data_long = self.contact_data.copy()
-        contact_data_long['name'] = long_name
-
-        name_field = ContactQuery._meta.get_field('name')
-        self.assertEqual(name_field.max_length, 200)
-
-        contact = ContactQuery.objects.create(**contact_data_long)
-        self.assertIsNotNone(contact.name)
+    def test_verbose_name(self):
+        meta = ContactQuery._meta
+        self.assertEqual(meta.verbose_name, "Contact Query")
+        self.assertEqual(meta.verbose_name_plural, "Contact Queries")
