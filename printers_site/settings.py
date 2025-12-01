@@ -94,19 +94,15 @@ DATABASES = {
         'HOST': os.getenv("DB_HOST", "127.0.0.1"),
         'PORT': os.getenv("DB_PORT", "3306"),
         'OPTIONS': {
+            'charset': 'utf8mb4',
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            'isolation_level': 'read committed',
         },
     }
 }
 
-# Override database for tests
-if 'test' in sys.argv:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': ':memory:',
-        }
-    }
+if os.getenv('DJANGO_SETTINGS_MODULE') == 'printers_site.settings.test':
+    DATABASES['default']['OPTIONS']['init_command'] += ", SET FOREIGN_KEY_CHECKS=0"
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv("EMAIL_HOST")
