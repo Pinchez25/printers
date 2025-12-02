@@ -270,7 +270,11 @@ def gallery_api(request: Request):
             filter_params["tag_list"] = ",".join(tags)
 
         filter_instance = PortfolioItemFilter(data=filter_params, request=request)
-        queryset = filter_instance.qs.prefetch_related("tags")
+        queryset = (
+            filter_instance.qs
+            .order_by("-created_at", "-id")
+            .prefetch_related("tags")
+        )
 
         paginator = Paginator(queryset, per_page)
         page_obj = paginator.get_page(page)
