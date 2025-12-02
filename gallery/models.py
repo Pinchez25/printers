@@ -11,7 +11,6 @@ from django.utils import timezone
 from taggit.managers import TaggableManager
 
 from gallery.fields import AutoCleanImageField, EncryptedCharField
-from gallery.storage_backends import SupabaseStorage
 
 
 # def get_backblaze_storage():
@@ -32,7 +31,7 @@ class PortfolioItem(models.Model):
         unique=True,
     )
     image = AutoCleanImageField(
-        upload_to=upload_to, storage=SupabaseStorage()
+        upload_to=upload_to
     )
     # image_ = models.ImageField(
     #     upload_to=upload_to, storage=get_backblaze_storage)
