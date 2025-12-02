@@ -92,6 +92,8 @@ class CompanyConfigAdmin(ModelAdmin):
 
     exclude = ('singleton_enforcer',)
 
+    change_form_template = "admin/companyconfig/smtp_instructions.html"
+
     fieldsets = (
         ("Basic Information", {
             "fields": ("address", "contact_number", "always_save_contactus_queries"),
@@ -103,12 +105,12 @@ class CompanyConfigAdmin(ModelAdmin):
         }),
         ("Email Configuration", {
             "fields": (
-                "email_host", 
-                "email_port", 
+                "email_host",
+                "email_port",
                 "email_use_tls",
-                "email_username", 
+                "email_username",
                 "email_password",
-                "email_from_address", 
+                "email_from_address",
                 "email_to_address"
             ),
             "classes": ["tab"],
