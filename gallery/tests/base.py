@@ -15,8 +15,8 @@ class DummyStorage(FileSystemStorage):
 
 @contextmanager
 def patched_supabase_storage():
-    with patch("gallery.models.SupabaseStorage", DummyStorage):
-        yield
+    # Historical reference - no longer needed as we use Django's default storage
+    yield
 
 
 class InMemoryMediaTestCase(TestCase):
@@ -30,12 +30,8 @@ class InMemoryMediaTestCase(TestCase):
             EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
         )
         cls._override.enable()
-        try:
-            from gallery.models import PortfolioItem
-            field = PortfolioItem._meta.get_field("image")
-            field.storage = DummyStorage()
-        except Exception:
-            pass
+        # No longer needed as we use Django's default storage
+        pass
 
     @classmethod
     def tearDownClass(cls):
