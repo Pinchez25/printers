@@ -1,4 +1,4 @@
-import { debounce, escapeHtml, truncateString } from "./utils.js";
+import { debounce, escapeHtml } from "./utils.js";
 import {
   show,
   hide,
@@ -25,6 +25,7 @@ class PortfolioState {
     this.currentPage = 1;
     this.filters = [];
     this.searchQuery = "";
+    this.hasMorePages = true;
   }
 }
 
@@ -94,7 +95,9 @@ function setupPortfolioEvents(elements, state) {
 
   if (elements.searchClear) {
     elements.searchClear.addEventListener("click", () => {
-      elements.searchInput.value = "";
+      if (elements.searchInput) {
+        elements.searchInput.value = "";
+      }
       state.searchQuery = "";
       hide(elements.searchClear);
       applyFilters(elements, state);
@@ -152,6 +155,7 @@ function handleFilterClick(btn, elements, state) {
 
 function applyFilters(elements, state) {
   state.currentPage = 1;
+  state.hasMorePages = true;
   loadPortfolioItems(elements, state, 1, false);
 }
 
@@ -160,7 +164,9 @@ function clearAllFilters(elements, state) {
     elements.searchInput.value = "";
   }
   state.searchQuery = "";
-  hide(elements.searchClear);
+  if (elements.searchClear) {
+    hide(elements.searchClear);
+  }
 
   state.filters = [];
   elements.filterBtns.forEach((btn) => btn.classList.remove("active"));
@@ -174,6 +180,8 @@ function clearAllFilters(elements, state) {
 }
 
 function handleSeeMore(elements, state) {
+  if (!elements.seeMoreText || !elements.seeMoreLoading) return;
+  
   hide(elements.seeMoreText);
   show(elements.seeMoreLoading, "block");
 
@@ -188,14 +196,14 @@ async function loadPortfolioItems(elements, state, page = 1, append = false) {
   if (state.isLoading) return;
 
   state.isLoading = true;
-  if (!append) {
+  if (!append && elements.loading) {
     show(elements.loading, "flex");
   }
 
   try {
     const params = new URLSearchParams({
-      page: page,
-      per_page: CONFIG.PORTFOLIO.ITEMS_PER_PAGE,
+      page: String(page),
+      per_page: String(CONFIG.PORTFOLIO.ITEMS_PER_PAGE),
       search: state.searchQuery,
     });
 
@@ -221,12 +229,14 @@ async function loadPortfolioItems(elements, state, page = 1, append = false) {
     const data = await response.json();
 
     if (data.success) {
-      state.hasMorePages = data.pagination.has_next;
-      state.currentPage = data.pagination.current_page;
+      state.hasMorePages = data.pagination?.has_next ?? false;
+      state.currentPage = data.pagination?.current_page ?? page;
 
-      renderPortfolioItems(elements, data.items, append, state);
+      renderPortfolioItems(elements, data.items || [], append, state);
 
-      toggle(elements.seeMoreContainer, state.hasMorePages, "block");
+      if (elements.seeMoreContainer) {
+        toggle(elements.seeMoreContainer, state.hasMorePages, "block");
+      }
     } else {
       throw new Error(data.message || "Failed to fetch portfolio data");
     }
@@ -236,9 +246,16 @@ async function loadPortfolioItems(elements, state, page = 1, append = false) {
       "Failed to load portfolio items. Please try again.",
       "error"
     );
+    
+    if (!append) {
+      elements.grid.innerHTML = "";
+      displayErrorState(elements, state);
+    }
   } finally {
     state.isLoading = false;
-    hide(elements.loading);
+    if (elements.loading) {
+      hide(elements.loading);
+    }
   }
 }
 
@@ -255,7 +272,7 @@ function renderPortfolioItems(elements, items, append = false, state) {
   hideNoResults(elements);
 
   const portfolioElements = items.map((item, index) =>
-    createPortfolioItemElement(elements.template, item, index)
+    createPortfolioItemElement(elements.template, item, append ? index + (state.currentPage - 1) * CONFIG.PORTFOLIO.ITEMS_PER_PAGE : index)
   );
 
   const fragment = createFragment(portfolioElements);
@@ -263,6 +280,8 @@ function renderPortfolioItems(elements, items, append = false, state) {
 }
 
 function setupImageLoading(img, wrapper, onLoadCallback) {
+  if (!wrapper) return;
+  
   wrapper.classList.add("loading");
 
   img.onload = function () {
@@ -289,91 +308,115 @@ function createPortfolioItemElement(template, item, index) {
   const clone = template.content.cloneNode(true);
   const div = clone.querySelector(".portfolio-item");
 
-  div.dataset.category = (item.tags || []).join(" ");
-  div.dataset.itemId = item.id ?? "";
-  // keep full description in dataset so lightbox can access it without
-  // rendering the description node inside the grid
-  div.dataset.fullDescription = escapeHtml(
-    item.description || CONFIG.PORTFOLIO.DEFAULT_DESCRIPTION
-  );
-  // store the title on the container so openLightbox can read it even
-  // if the title element isn't created in the DOM
-  div.dataset.title = item.title || "";
-  div.style.setProperty(
-    "--animation-delay",
-    `${index * ANIMATION_DELAY_MULTIPLIER}s`
-  );
+  if (div) {
+    div.dataset.category = (item.tags || []).join(" ");
+    div.dataset.itemId = String(item.id ?? "");
+    div.dataset.fullDescription = escapeHtml(
+      item.description || CONFIG.PORTFOLIO.DEFAULT_DESCRIPTION
+    );
+    div.dataset.title = item.title || "";
+    div.dataset.tags = (item.tags || []).join(",");
+    div.style.setProperty(
+      "--animation-delay",
+      `${index * ANIMATION_DELAY_MULTIPLIER}s`
+    );
+  }
 
   const img = clone.querySelector(".portfolio-image");
   const imgWrapper = clone.querySelector(".portfolio-image-wrapper");
 
-  img.alt = item.title || "";
-  setupImageLoading(img, imgWrapper);
-  img.src = item.thumbnail || CONFIG.PORTFOLIO.DEFAULT_IMAGE;
+  if (img && imgWrapper) {
+    img.alt = item.title || "";
+    setupImageLoading(img, imgWrapper);
+    img.src = item.thumbnail || CONFIG.PORTFOLIO.DEFAULT_IMAGE;
+  }
 
-  // set overlay title when present in template
   const overlayTitle = clone.querySelector(".portfolio-overlay-title");
   if (overlayTitle) overlayTitle.textContent = item.title || "";
-
-  // store tags as a comma-separated dataset for potential filtering or
-  // accessibility use without creating tag elements in the grid
-  div.dataset.tags = (item.tags || []).join(",");
 
   return clone;
 }
 
-function displayNoResultsInGrid(elements) {
+function displayNoResultsInGrid(elements, state) {
   elements.grid.innerHTML = "";
-  const noResultsContainer = document.createElement('div');
-  noResultsContainer.className = 'no-results-container';
+  const noResultsContainer = document.createElement("div");
+  noResultsContainer.className = "no-results-container";
   noResultsContainer.innerHTML = `
     <div class="no-results-icon">🔍</div>
     <p class="no-results-text">No projects found</p>
     <button class="btn-secondary clear-filters-btn">Clear Search & Filters</button>
   `;
   elements.grid.appendChild(noResultsContainer);
-  const clearBtn = noResultsContainer.querySelector('.clear-filters-btn');
-  clearBtn.addEventListener('click', () => {
-    clearAllFilters(elements, state);
-  });
-  hide(elements.controls);
-  hide(elements.filters);
-  hide(elements.seeMoreContainer);
+  
+  const clearBtn = noResultsContainer.querySelector(".clear-filters-btn");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      clearAllFilters(elements, state);
+    });
+  }
+  
+  if (elements.controls) hide(elements.controls);
+  if (elements.filters) hide(elements.filters);
+  if (elements.seeMoreContainer) hide(elements.seeMoreContainer);
+}
+
+function displayErrorState(elements, state) {
+  const errorContainer = document.createElement("div");
+  errorContainer.className = "error-container";
+  errorContainer.innerHTML = `
+    <div class="error-icon">⚠️</div>
+    <p class="error-text">Unable to load portfolio items</p>
+    <button class="btn-primary retry-btn">Retry</button>
+  `;
+  elements.grid.appendChild(errorContainer);
+  
+  const retryBtn = errorContainer.querySelector(".retry-btn");
+  if (retryBtn) {
+    retryBtn.addEventListener("click", () => {
+      loadPortfolioItems(elements, state, state.currentPage, false);
+    });
+  }
 }
 
 function hideNoResults(elements) {
   show(elements.grid, "grid");
-  show(elements.controls, "flex");
-  show(elements.filters, "flex");
+  if (elements.controls) show(elements.controls, "flex");
+  if (elements.filters) show(elements.filters, "flex");
 }
 
 function openLightbox(item, elements) {
   const img = item.querySelector(".portfolio-image");
-  // title may not exist as a DOM node inside the grid anymore; prefer
-  // the dataset value (set when the element is created) and fall back to
-  // a title element if present for compatibility.
   const title = item.dataset.title || item.querySelector(".portfolio-title")?.textContent || "";
   const description = item.dataset.fullDescription || "";
-  const imageWrapper = elements.lightboxImage.parentElement;
+  const imageWrapper = elements.lightboxImage?.parentElement;
 
-  elements.lightboxImage.classList.remove("loaded");
-  elements.lightboxTitle.textContent = title;
-  elements.lightboxDescription.textContent = description;
-  elements.lightboxImage.alt = title;
+  if (elements.lightboxImage) {
+    elements.lightboxImage.classList.remove("loaded");
+    elements.lightboxImage.alt = title;
+    
+    if (imageWrapper) {
+      setupImageLoading(elements.lightboxImage, imageWrapper, () => {
+        initialiseZoomist(elements);
+      });
+    }
+    
+    if (img) {
+      elements.lightboxImage.src = img.src;
+    }
+  }
+  
+  if (elements.lightboxTitle) elements.lightboxTitle.textContent = title;
+  if (elements.lightboxDescription) elements.lightboxDescription.textContent = description;
 
-  setupImageLoading(elements.lightboxImage, imageWrapper, () => {
-    initialiseZoomist(elements);
-  });
-
-  elements.lightboxImage.src = img.src;
-
-  show(elements.lightbox, "flex");
+  if (elements.lightbox) show(elements.lightbox, "flex");
   document.body.style.overflow = "hidden";
 }
 
 function closeLightbox(elements) {
-  hide(elements.lightbox);
-  document.body.style.overflow = "auto";
+  if (elements.lightbox) {
+    hide(elements.lightbox);
+  }
+  document.body.style.overflow = "";
   if (sharedZoomist) {
     sharedZoomist.reset();
   }
