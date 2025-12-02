@@ -1,6 +1,6 @@
 import logging
 from functools import lru_cache
-from typing import Callable, Dict, Iterable, Optional
+from typing import Any, Callable, Dict, Iterable, Optional
 
 from cryptography.fernet import Fernet, InvalidToken
 from django.conf import settings
@@ -110,6 +110,13 @@ class AutoCleanFileField(FileField):
         as Django signals are not triggered in those cases.
       - File deletion is deferred until after the database transaction commits,
         ensuring consistency between database state and storage.
+      - Race condition: Between checking file references and deletion, another transaction
+        could save a record using the same file, resulting in an orphaned file reference.
+        This window is typically <100ms and acceptable for most applications.
+        For high-concurrency scenarios requiring stronger guarantees, consider:
+        * Application-level file reference counting
+        * Periodic clean-up jobs to reconcile orphaned references
+        * Using object storage with lifecycle policies
     """
 
     def __init__(self, *args, cleanup: bool = True, raise_on_delete_error: bool = False, **kwargs):
@@ -117,7 +124,7 @@ class AutoCleanFileField(FileField):
         self.raise_on_delete_error = bool(raise_on_delete_error)
         super().__init__(*args, **kwargs)
 
-    def contribute_to_class(self, cls, name, **kwargs):
+    def contribute_to_class(self, cls: type[Model], name: str, **kwargs: Any) -> None:
         """
         Register signal handlers once per concrete model and store field references.
         """
@@ -125,7 +132,7 @@ class AutoCleanFileField(FileField):
 
         existing = getattr(cls, "_autoclean_file_fields", None)
         if existing is None:
-            cls._autoclean_file_fields: Dict[str, "AutoCleanFileField"] = {}
+            cls._autoclean_file_fields = {}
         cls._autoclean_file_fields[name] = self
 
         if getattr(cls, "_autoclean_signals_registered", False):
@@ -134,7 +141,6 @@ class AutoCleanFileField(FileField):
         if getattr(cls._meta, "abstract", False):
             return
 
-        # Use dispatch_uid to prevent duplicate signal registration
         post_delete.connect(
             receiver=_make_post_delete_handler(cls),
             sender=cls,
@@ -149,12 +155,16 @@ class AutoCleanFileField(FileField):
         cls._autoclean_signals_registered = True
 
 
-def _make_post_delete_handler(model_cls) -> Callable:
+def _make_post_delete_handler(model_cls: type[Model]) -> Callable:
     """Return a post_delete handler that deletes files for all autoclean fields."""
 
-    def _handler(sender, instance, **kwargs):
-        for field_name, field in getattr(sender, "_autoclean_file_fields", {}).items():
-            if not getattr(field, "cleanup", True):
+    def handler(sender: type[Model], instance: Model, **kwargs: Any) -> None:
+        autoclean_fields = getattr(sender, "_autoclean_file_fields", {})
+        if not autoclean_fields:
+            return
+
+        for field_name, field in autoclean_fields.items():
+            if not field.cleanup:
                 continue
 
             file_field = getattr(instance, field_name, None)
@@ -171,32 +181,45 @@ def _make_post_delete_handler(model_cls) -> Callable:
                     "AutoCleanFileField: deleted file '%s' for %s.%s",
                     file_name, sender.__name__, field_name
                 )
-            except Exception as exc:
+            except (OSError, IOError) as exc:
                 logger.exception(
                     "AutoCleanFileField: failed to delete '%s' on delete for %s.%s: %s",
                     file_name, sender.__name__, field_name, exc
                 )
-                if getattr(field, "raise_on_delete_error", False):
+                if field.raise_on_delete_error:
+                    raise
+            except Exception as exc:
+                logger.exception(
+                    "AutoCleanFileField: unexpected error deleting '%s' on delete for %s.%s: %s",
+                    file_name, sender.__name__, field_name, exc
+                )
+                if field.raise_on_delete_error:
                     raise
 
-    return _handler
+    return handler
 
 
-def _make_post_save_handler(model_cls) -> Callable:
+def _make_post_save_handler(model_cls: type[Model]) -> Callable:
     """
     Return a post_save handler that schedules old file deletion after transaction commit.
     """
 
-    def _handler(sender, instance: Model, created: bool, update_fields: Optional[Iterable], **kwargs):
+    def handler(sender: type[Model], instance: Model, created: bool, 
+                update_fields: Optional[Iterable], **kwargs: Any) -> None:
         if created:
             return
 
-        # Optimise: skip if update_fields is provided and no autoclean fields are included
-        autoclean_field_names = set(getattr(sender, "_autoclean_file_fields", {}).keys())
+        autoclean_fields = getattr(sender, "_autoclean_file_fields", {})
+        if not autoclean_fields:
+            return
+
+        autoclean_field_names = set(autoclean_fields.keys())
         if update_fields is not None:
             update_field_names = {str(f) for f in update_fields}
             if not autoclean_field_names.intersection(update_field_names):
                 return
+        else:
+            update_field_names = None
 
         try:
             old_instance = sender.objects.get(pk=instance.pk)
@@ -205,12 +228,11 @@ def _make_post_save_handler(model_cls) -> Callable:
 
         files_to_delete = []
 
-        for field_name, field in getattr(sender, "_autoclean_file_fields", {}).items():
-            if not getattr(field, "cleanup", True):
+        for field_name, field in autoclean_fields.items():
+            if not field.cleanup:
                 continue
 
-            # Skip if field wasn't updated (when update_fields is specified)
-            if update_fields is not None and field_name not in {str(f) for f in update_fields}:
+            if update_field_names is not None and field_name not in update_field_names:
                 continue
 
             old_file = getattr(old_instance, field_name, None)
@@ -219,11 +241,9 @@ def _make_post_save_handler(model_cls) -> Callable:
             old_name = getattr(old_file, "name", None) if old_file else None
             new_name = getattr(new_file, "name", None) if new_file else None
 
-            # No old file or same file → nothing to delete
             if not old_name or old_name == new_name:
                 continue
 
-            # Check if any other instance still references this file
             try:
                 still_referenced = (
                     sender.objects
@@ -231,12 +251,20 @@ def _make_post_save_handler(model_cls) -> Callable:
                     .exclude(pk=instance.pk)
                     .exists()
                 )
-            except Exception as exc:
+            except (ObjectDoesNotExist, ValueError, TypeError) as exc:
                 logger.exception(
                     "AutoCleanFileField: DB check failed while deciding whether to delete '%s': %s",
                     old_name, exc
                 )
-                if getattr(field, "raise_on_delete_error", False):
+                if field.raise_on_delete_error:
+                    raise
+                continue
+            except Exception as exc:
+                logger.exception(
+                    "AutoCleanFileField: unexpected error during DB check for '%s': %s",
+                    old_name, exc
+                )
+                if field.raise_on_delete_error:
                     raise
                 continue
 
@@ -247,30 +275,36 @@ def _make_post_save_handler(model_cls) -> Callable:
                 )
                 continue
 
-            files_to_delete.append((old_file, old_name, field_name))
+            files_to_delete.append((old_file, old_name, field_name, field))
 
         if files_to_delete:
             transaction.on_commit(lambda: _delete_files(sender, files_to_delete))
 
-    return _handler
+    return handler
 
 
-def _delete_files(sender, files_to_delete):
+def _delete_files(sender: type[Model], files_to_delete: list) -> None:
     """Delete files after transaction commit."""
-    for old_file, old_name, field_name in files_to_delete:
-        field = sender._autoclean_file_fields.get(field_name)
+    for old_file, old_name, field_name, field in files_to_delete:
         try:
             old_file.delete(save=False)
             logger.debug(
                 "AutoCleanFileField: deleted old file '%s' for %s.%s",
                 old_name, sender.__name__, field_name
             )
-        except Exception as exc:
+        except (OSError, IOError) as exc:
             logger.exception(
                 "AutoCleanFileField: failed to delete old file '%s' for %s.%s: %s",
                 old_name, sender.__name__, field_name, exc
             )
-            if field and getattr(field, "raise_on_delete_error", False):
+            if field.raise_on_delete_error:
+                raise
+        except Exception as exc:
+            logger.exception(
+                "AutoCleanFileField: unexpected error deleting old file '%s' for %s.%s: %s",
+                old_name, sender.__name__, field_name, exc
+            )
+            if field.raise_on_delete_error:
                 raise
 
 
