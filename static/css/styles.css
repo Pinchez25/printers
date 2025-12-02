@@ -920,6 +920,17 @@ section {
   min-height: 200px;
 }
 
+.no-results-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  grid-column: 1 / -1;
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
 .portfolio-item {
   background: transparent;
   border-radius: 20px;
@@ -1978,6 +1989,19 @@ footer {
     padding: 0.25rem;
   }
 
+  .no-results-container {
+    padding: 2rem 1rem;
+    gap: 1rem;
+  }
+
+  .no-results-icon {
+    font-size: 3rem;
+  }
+
+  .no-results-text {
+    font-size: 1.1rem;
+  }
+
   .portfolio-item {
     border-radius: 16px;
   }
@@ -2299,39 +2323,6 @@ footer {
   display: none;
 }
 
-.no-results-state {
-  text-align: center;
-  padding: 5rem 2rem;
-  color: rgba(241, 245, 249, 0.7);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  margin: 3rem auto;
-  max-width: 600px;
-  background: rgba(30, 41, 59, 0.4);
-  backdrop-filter: blur(20px);
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-  position: relative;
-  overflow: hidden;
-}
-
-.no-results-state::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle,
-      rgba(99, 102, 241, 0.1) 0%,
-      transparent 70%);
-  animation: pulse-glow 4s ease-in-out infinite;
-  pointer-events: none;
-}
 
 @keyframes pulse-glow {
 
@@ -2348,8 +2339,7 @@ footer {
 }
 
 .no-results-icon {
-  font-size: 5rem;
-  margin-bottom: 1.5rem;
+  font-size: 4rem;
   opacity: 0.8;
   filter: drop-shadow(0 4px 20px rgba(99, 102, 241, 0.3));
   animation: float-icon 3s ease-in-out infinite;
@@ -2371,7 +2361,6 @@ footer {
   font-size: 1.375rem;
   font-weight: 700;
   color: var(--white);
-  margin-bottom: 0.5rem;
   background: var(--gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -2412,12 +2401,6 @@ footer {
   margin-right: auto;
 }
 
-.no-results-hint {
-  margin-top: 0.75rem;
-  font-size: 0.9375rem;
-  color: rgba(241, 245, 249, 0.6);
-  font-weight: 500;
-}
 
 .empty-portfolio-cta {
   background: var(--gradient);

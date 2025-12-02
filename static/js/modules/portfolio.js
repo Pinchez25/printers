@@ -46,7 +46,6 @@ function cachePortfolioElements() {
   return {
     grid: document.getElementById("portfolioGrid"),
     loading: document.getElementById("portfolioLoading"),
-    noResults: document.getElementById("no-results-state"),
     controls: document.getElementById("portfolio-controls"),
     filters: document.getElementById("portfolio-filters"),
     filterBtns: document.querySelectorAll(".filter-btn"),
@@ -225,7 +224,7 @@ async function loadPortfolioItems(elements, state, page = 1, append = false) {
       state.hasMorePages = data.pagination.has_next;
       state.currentPage = data.pagination.current_page;
 
-      renderPortfolioItems(elements, data.items, append);
+      renderPortfolioItems(elements, data.items, append, state);
 
       toggle(elements.seeMoreContainer, state.hasMorePages, "block");
     } else {
@@ -243,13 +242,13 @@ async function loadPortfolioItems(elements, state, page = 1, append = false) {
   }
 }
 
-function renderPortfolioItems(elements, items, append = false) {
+function renderPortfolioItems(elements, items, append = false, state) {
   if (!append) {
     elements.grid.innerHTML = "";
   }
 
   if (items.length === 0) {
-    showNoResults(elements);
+    displayNoResultsInGrid(elements, state);
     return;
   }
 
@@ -323,11 +322,22 @@ function createPortfolioItemElement(template, item, index) {
   return clone;
 }
 
-function showNoResults(elements) {
-  hide(elements.grid);
+function displayNoResultsInGrid(elements) {
+  elements.grid.innerHTML = "";
+  const noResultsContainer = document.createElement('div');
+  noResultsContainer.className = 'no-results-container';
+  noResultsContainer.innerHTML = `
+    <div class="no-results-icon">🔍</div>
+    <p class="no-results-text">No projects found</p>
+    <button class="btn-secondary clear-filters-btn">Clear Search & Filters</button>
+  `;
+  elements.grid.appendChild(noResultsContainer);
+  const clearBtn = noResultsContainer.querySelector('.clear-filters-btn');
+  clearBtn.addEventListener('click', () => {
+    clearAllFilters(elements, state);
+  });
   hide(elements.controls);
   hide(elements.filters);
-  show(elements.noResults, "flex");
   hide(elements.seeMoreContainer);
 }
 
@@ -335,7 +345,6 @@ function hideNoResults(elements) {
   show(elements.grid, "grid");
   show(elements.controls, "flex");
   show(elements.filters, "flex");
-  hide(elements.noResults);
 }
 
 function openLightbox(item, elements) {
